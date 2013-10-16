@@ -5,3 +5,7 @@
 *.suo
 *.vcxproj
 *.filters
+*.opensdf
+/Debug
+/ipch
+/result.ppm

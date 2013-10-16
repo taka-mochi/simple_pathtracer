@@ -1,0 +1,7 @@
+
+*.user
+*.sdf
+*.sln
+*.suo
+*.vcxproj
+*.filters

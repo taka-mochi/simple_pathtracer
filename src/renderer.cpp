@@ -8,17 +8,30 @@
 using namespace std;
 
 PathTracer::PathTracer(int screen_width, int screen_height, int samples, int supersamples)
-	: m_width(screen_width)
-	, m_height(screen_height)
-	, m_samples(samples)
-	, m_supersamples(supersamples)
-	, m_camPos(50.0, 52.0, 220.0)
-	, m_camDir(0.0, -0.04, -1.0)
-	, m_camUp(0.0, 1.0, 0.0)
-	, m_nearScreenHeight(30.0)
-	, m_distToScreen(40.0)
 {
-	m_camDir.normalize();
+  init(screen_width, screen_height, samples, samples, supersamples, NULL);
+}
+
+PathTracer::PathTracer(int screen_width, int screen_height, int min_samples, int max_samples, int supersamples, RenderingFinishCallback *callback)
+{
+  init(screen_width, screen_height, min_samples, max_samples, supersamples, callback);
+}
+
+void PathTracer::init(int screen_width, int screen_height, int min_samples, int max_samples, int supersamples, RenderingFinishCallback *callback)
+{
+  m_width = screen_width;
+	m_height = (screen_height);
+	m_min_samples = (min_samples);
+  m_max_samples = max_samples;
+	m_supersamples = (supersamples);
+	m_camPos = Vector3(50.0, 52.0, 220.0);
+	m_camDir = Vector3(0.0, -0.04, -1.0);
+	m_camUp = Vector3(0.0, 1.0, 0.0);
+	m_nearScreenHeight = (30.0);
+	m_distToScreen = (40.0);
+  m_renderFinishCallback = callback;
+
+  m_camDir.normalize();
 	m_result = new Color[m_width*m_height];
 }
 
@@ -41,16 +54,29 @@ void PathTracer::RenderScene(const Scene &scene) {
   // スクリーン中心
   const Vector3 screen_center = m_camPos + m_camDir * m_distToScreen;
 
-  const double averaging_factor = m_samples * m_supersamples * m_supersamples;
+  int previous_samples = 0;
+  for (int samples=m_min_samples; samples<=m_max_samples; samples++) {
+    ScanPixelsAndCastRays(scene, screen_x, screen_y, screen_center, previous_samples, samples);
+    previous_samples = samples;
+    cerr << "samples = " << samples << " rendering finished." << endl;
+    if (m_renderFinishCallback) {
+      (*m_renderFinishCallback)(samples, m_result);
+    }
+  }
+}
 
+void PathTracer::ScanPixelsAndCastRays(const Scene &scene, const Vector3 &screen_x, const Vector3 &screen_y, const Vector3 &screen_center, int previous_samples, int next_samples) {
   // trace all pixels
   int processed_y_counts = 0;
+  const double averaging_factor = next_samples * m_supersamples * m_supersamples;
 #pragma omp parallel for
   for (int y=0; y<m_height; y++) {
-    Random rnd(y+1);
+    Random rnd(y+1+previous_samples*m_height);
     cerr << "y = " << y << endl; 
     for (int x=0; x<m_width; x++) {
       const int index = x + (m_height - y - 1)*m_width;
+
+      Color accumulated_radiance;
        
       // super-sampling
       for (int sy=0; sy<m_supersamples; sy++) for (int sx=0; sx < m_supersamples; sx++) {
@@ -64,13 +90,13 @@ void PathTracer::RenderScene(const Scene &scene) {
         Vector3 target_dir = target_position - m_camPos;
         target_dir.normalize();
 
-        Color total_radiance;
         // (m_samples)回サンプリングする
-        for (int s=0; s<m_samples; s++) {
-          total_radiance += Radiance(scene, Ray(m_camPos, target_dir), rnd, 0);
+        for (int s=previous_samples+1; s<=next_samples; s++) {
+          accumulated_radiance += Radiance(scene, Ray(m_camPos, target_dir), rnd, 0);
         }
-        m_result[index] += total_radiance / averaging_factor;
       }
+      // img_n+c(x) = n/(n+c)*img_n(x) + 1/(n+c)*sum_{n+1}^{n+c}rad_i(x)/supersamples^2
+      m_result[index] = m_result[index] * (static_cast<double>(previous_samples) / next_samples) + accumulated_radiance / averaging_factor;
     }
     processed_y_counts++;
     cerr << static_cast<double>(processed_y_counts)/m_height*100 << "% finished" << endl;

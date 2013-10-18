@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <cmath>
+#include <sstream>
 #include "color.h"
 
 class PPM {
@@ -21,11 +22,13 @@ private:
 public:
 	static void save(const std::string &filename, const Color *image, int width, int height) {
 		std::ofstream ofs(filename.c_str());
-		ofs << "P3" << std::endl;
-		ofs << width << " " << height << std::endl;
-		ofs << 255 << std::endl;
+    std::stringstream ss;
+		ss << "P3" << std::endl;
+		ss << width << " " << height << std::endl;
+		ss << 255 << std::endl;
 		for (int i=0; i<width*height; i++) {
-			ofs << to_rgb(gammaRev(image[i].x)) << " " << to_rgb(gammaRev(image[i].y)) << " " << to_rgb(gammaRev(image[i].z)) << std::endl;
+			ss << to_rgb(gammaRev(image[i].x)) << " " << to_rgb(gammaRev(image[i].y)) << " " << to_rgb(gammaRev(image[i].z)) << std::endl;
 		}
+    ofs << ss.str();
 	}
 };

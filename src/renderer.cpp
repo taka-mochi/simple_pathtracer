@@ -44,32 +44,37 @@ void PathTracer::RenderScene(const Scene &scene) {
   const double averaging_factor = m_samples * m_supersamples * m_supersamples;
 
   // trace all pixels
+  int processed_y_counts = 0;
+#pragma omp parallel for
   for (int y=0; y<m_height; y++) {
     Random rnd(y+1);
     cerr << "y = " << y << endl; 
     for (int x=0; x<m_width; x++) {
-       const int index = x + (m_height - y - 1)*m_width;
+      const int index = x + (m_height - y - 1)*m_width;
        
-       // super-sampling
-       for (int sy=0; sy<m_supersamples; sy++) for (int sx=0; sx < m_supersamples; sx++) {
-         // (x,y)ピクセル内での位置: [0,1]
-         const double rx = (2.0*sx + 1.0)/(2*m_supersamples);
-         const double ry = (2.0*sy + 1.0)/(2*m_supersamples);
+      // super-sampling
+      for (int sy=0; sy<m_supersamples; sy++) for (int sx=0; sx < m_supersamples; sx++) {
+        // (x,y)ピクセル内での位置: [0,1]
+        const double rx = (2.0*sx + 1.0)/(2*m_supersamples);
+        const double ry = (2.0*sy + 1.0)/(2*m_supersamples);
 
-         Vector3 target_position = screen_center +
-           screen_x * ((x+rx)/m_width - 0.5) +
-           screen_y * ((y+ry)/m_height - 0.5);
-         Vector3 target_dir = target_position - m_camPos;
-         target_dir.normalize();
+        Vector3 target_position = screen_center +
+          screen_x * ((x+rx)/m_width - 0.5) +
+          screen_y * ((y+ry)/m_height - 0.5);
+        Vector3 target_dir = target_position - m_camPos;
+        target_dir.normalize();
 
-         Color total_radiance;
-         // (m_samples)回サンプリングする
-         for (int s=0; s<m_samples; s++) {
-           total_radiance += Radiance(scene, Ray(m_camPos, target_dir), rnd, 0);
-         }
-         m_result[index] += total_radiance / averaging_factor;
-       }
-     }
+        Color total_radiance;
+        // (m_samples)回サンプリングする
+        for (int s=0; s<m_samples; s++) {
+          total_radiance += Radiance(scene, Ray(m_camPos, target_dir), rnd, 0);
+        }
+        m_result[index] += total_radiance / averaging_factor;
+      }
+    }
+    processed_y_counts++;
+    cerr << static_cast<double>(processed_y_counts)/m_height*100 << "% finished" << endl;
+
   }
 }
 
@@ -85,7 +90,6 @@ Color PathTracer::Radiance(const Scene &scene, const Ray &ray, Random &rnd, cons
   }
 
   Vector3 normal = intersect.hit.normal.dot(ray.dir) < 0.0 ? intersect.hit.normal : intersect.hit.normal * -1.0;
-  Color weight(1,1,1);
   Color income;
 
   double russian_roulette_probability = std::max(intersect.object->color.x, std::max(intersect.object->color.y, intersect.object->color.z)); // 適当
@@ -100,8 +104,22 @@ Color PathTracer::Radiance(const Scene &scene, const Ray &ray, Random &rnd, cons
     russian_roulette_probability = 1.0; // no roulette
   }
 
-//   switch (intersect.object->reflection_type) {
+   switch (intersect.object->reflection_type) {
+   case SceneObject::REFLECTION_TYPE_LAMBERT:
+     income = Radiance_Lambert(scene, ray, rnd, depth, intersect, normal, russian_roulette_probability);
   // lambertian
+
+
+
+   }
+  
+  
+//  }
+
+  return income;
+}
+
+Color PathTracer::Radiance_Lambert(const Scene &scene, const Ray &ray, Random &rnd, const int depth, Scene::IntersectionInformation &intersect, const Vector3 &normal, double russian_roulette_prob) {
   Vector3 w,u,v;
 
   w = normal;
@@ -133,11 +151,7 @@ Color PathTracer::Radiance(const Scene &scene, const Ray &ray, Random &rnd, cons
   Vector3 dir = u*r3*cos(r1) + v*r3*sin(r1) + w*r2;
   dir.normalize();
 
-  income = Radiance(scene, Ray(intersect.hit.position, dir), rnd, depth+1);
-
-  weight = intersect.object->color / PI * r2 / pdf / russian_roulette_probability;
-  
-//  }
-
+  Color weight = intersect.object->color / PI * r2 / pdf / russian_roulette_prob;
+  Color income = Radiance(scene, Ray(intersect.hit.position, dir), rnd, depth+1);
   return intersect.object->emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
 }

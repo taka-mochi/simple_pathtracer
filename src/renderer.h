@@ -1,6 +1,7 @@
 #pragma once
 
 #include "color.h"
+#include "scene.h"
 
 class Scene;
 class Ray;
@@ -23,6 +24,8 @@ public:
 
 private:
   Color Radiance(const Scene &scene, const Ray &ray, Random &rnd, const int depth);
+
+  Color Radiance_Lambert(const Scene &scene, const Ray &ray, Random &rnd, const int depth, Scene::IntersectionInformation &intersect, const Vector3 &normal, double russian_roulette_prob);
 
 private:
 	int m_width;

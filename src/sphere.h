@@ -7,8 +7,8 @@
 
 class Sphere : public SceneObject {
 public:
-  Sphere(double r, const Vector3 &pos, const Color &emission_, const Color &color_)
-    : SceneObject(color_, emission_)
+  Sphere(double r, const Vector3 &pos, const Color &emission_, const Color &color_, const REFLECTION_TYPE reflection_type_)
+    : SceneObject(color_, emission_, reflection_type_)
     , m_position(pos)
     , m_radius(r)
   {

@@ -4,13 +4,12 @@
 
 class Ray {
 public:
-  Ray(const Vector3 &begin, const Vector3 &dir)
-    : m_begin(begin)
-    , m_dir(dir)
+  Ray(const Vector3 &begin_, const Vector3 &dir_)
+    : begin(begin_)
+    , dir(dir_)
   {
   }
 
-private:
-  Vector3 m_begin;
-  Vector3 m_dir;
+  Vector3 begin;
+  Vector3 dir;
 };

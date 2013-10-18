@@ -45,6 +45,18 @@ public:
 		z /= v;
 		return *this;
 	}
+  Vector3 operator * (double v) const {
+    return Vector3(x*v, y*v, z*v);
+  }
+  Vector3 operator / (double v) const {
+    return Vector3(x/v, y/v, z/v);
+  }
+  Vector3 operator + (const Vector3 &v) const {
+    return Vector3(x+v.x, y+v.y, z+v.z);
+  }
+  Vector3 operator - (const Vector3 &v) const {
+    return Vector3(x-v.x, y-v.y, z-v.z);
+  }
 	double dot(const Vector3 &r) const {
 		return x*r.x + y*r.y + z*r.z;
 	}

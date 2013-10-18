@@ -3,6 +3,8 @@
 #include "color.h"
 
 class Scene;
+class Ray;
+class Random;
 
 class PathTracer {
 public:
@@ -18,6 +20,9 @@ public:
 	void RenderScene(const Scene &scene);
 
 	const Color *GetResult() const {return m_result;}
+
+private:
+  Vector3 Radiance(const Ray &ray, Random &rnd, const int depth);
 
 private:
 	int m_width;

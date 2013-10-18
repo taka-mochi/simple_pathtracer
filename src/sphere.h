@@ -7,15 +7,14 @@
 
 class Sphere : public SceneObject {
 public:
-  Sphere(double r, const Vector3 &pos, const Color &color, const Color &emission)
-    : m_radius(r)
+  Sphere(double r, const Vector3 &pos, const Color &emission_, const Color &color_)
+    : SceneObject(color_, emission_)
     , m_position(pos)
-    , m_color(color)
-    , m_emission(emission)
+    , m_radius(r)
   {
   }
 
-  bool Intersect(const Ray &ray, HitInformation &hit) 
+  bool Intersect(const Ray &ray, HitInformation &hit) const
   {
     // x: the origin of the ray
     // v: normalized direction of the ray
@@ -38,11 +37,10 @@ public:
 
     if (t1 < 0 && t2 < 0) return false;
 
-    if (t1 < t2) {
-      hit.distance = t1;
-    } else {
-      hit.distance = t2;
-    }
+    if (t1 < 0 && t2 > 0) hit.distance = t2;
+    else if (t1 > 0 && t2 < 0) hit.distance = t1;
+    else if (t1 < t2) hit.distance = t1;
+    else hit.distance = t2;
 
     hit.position = x + v * hit.distance;
     hit.normal = hit.position - m_position; hit.normal.normalize();
@@ -53,6 +51,4 @@ public:
 private:
   double m_radius;
   Vector3 m_position;
-  Color m_color;
-  Color m_emission;
 };

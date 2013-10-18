@@ -4,6 +4,6 @@
 
 class CornellBoxScene : public Scene {
 public:
-	CornellBoxScene() {
-	}
+	CornellBoxScene();
+  virtual ~CornellBoxScene();
 };

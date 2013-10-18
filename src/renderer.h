@@ -22,7 +22,7 @@ public:
 	const Color *GetResult() const {return m_result;}
 
 private:
-  Vector3 Radiance(const Scene &scene, const Ray &ray, Random &rnd, const int depth);
+  Color Radiance(const Scene &scene, const Ray &ray, Random &rnd, const int depth);
 
 private:
 	int m_width;

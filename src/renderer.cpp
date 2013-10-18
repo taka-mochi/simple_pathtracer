@@ -41,13 +41,15 @@ void PathTracer::RenderScene(const Scene &scene) {
   // スクリーン中心
   const Vector3 screen_center = m_camPos + m_camDir * m_distToScreen;
 
+  const double averaging_factor = m_samples * m_supersamples * m_supersamples;
+
   // trace all pixels
   for (int y=0; y<m_height; y++) {
     Random rnd(y+1);
     cerr << "y = " << y << endl; 
     for (int x=0; x<m_width; x++) {
        const int index = x + (m_height - y - 1)*m_width;
-       const double averaging_factor = m_samples * m_supersamples * m_supersamples;
+       
        // super-sampling
        for (int sy=0; sy<m_supersamples; sy++) for (int sx=0; sx < m_supersamples; sx++) {
          // (x,y)ピクセル内での位置: [0,1]
@@ -71,12 +73,71 @@ void PathTracer::RenderScene(const Scene &scene) {
   }
 }
 
- Vector3 PathTracer::Radiance(const Scene &scene, const Ray &ray, Random &rnd, const int depth) {
-   Scene::IntersectionInformation intersect;
+const static int MinDepth = 5;
+const static int MaxDepth = 64;
 
-   if (scene.CheckIntersection(ray, intersect)) {
-     //std::cerr << "Hit to " << intersect.object << " distance = " << intersect.hit.distance << std::endl;
-     return intersect.object->color;
-   }
-   return Vector3(0,0,0);
- }
+Color PathTracer::Radiance(const Scene &scene, const Ray &ray, Random &rnd, const int depth) {
+  Scene::IntersectionInformation intersect;
+
+  if (!scene.CheckIntersection(ray, intersect)) {
+    //std::cerr << "Hit to " << intersect.object << " distance = " << intersect.hit.distance << std::endl;
+    return Vector3(0,0,0);
+  }
+
+  Vector3 normal = intersect.hit.normal.dot(ray.dir) < 0.0 ? intersect.hit.normal : intersect.hit.normal * -1.0;
+  Color weight(1,1,1);
+  Color income;
+
+  double russian_roulette_probability = std::max(intersect.object->color.x, std::max(intersect.object->color.y, intersect.object->color.z)); // 適当
+  if (depth > MaxDepth) {
+    russian_roulette_probability *= pow(0.5, depth-MaxDepth);
+  }
+  if (depth > MinDepth) {
+    if (rnd.nextDouble() >= russian_roulette_probability) {
+      return intersect.object->emission;
+    }
+  } else {
+    russian_roulette_probability = 1.0; // no roulette
+  }
+
+//   switch (intersect.object->reflection_type) {
+  // lambertian
+  Vector3 w,u,v;
+
+  w = normal;
+  if (fabs(normal.x) > EPS) {
+   u = Vector3(0,1,0).cross(w);
+  } else {
+   u = Vector3(1,0,0).cross(w);
+  }
+  v = w.cross(u);
+  double u1 = rnd.nextDouble(); double u2 = rnd.nextDouble();
+  // pdf is 1/PI
+  //double r1 = PI*u1; // Φ
+  //double r2 = 1-u2; // cosθ
+  //double r3 = sqrt(1-r2*r2); // sinθ
+  //double pdf = 1/PI;
+
+  // pdf is cosθ/PI
+  double r1 = 2*PI*u1;
+  double r2 = sqrt(u2); // cosθ
+  double r3 = sqrt(1-u2); // sinθ
+  double pdf = r2/PI;
+
+  //const double r1 = 2 * PI * rnd.nextDouble();
+  //const double r2 = rnd.nextDouble(), r2s = sqrt(r2);
+  //Vector3 dir = u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1.0-r2);
+  //dir.normalize();
+  //weight = intersect.object->color / russian_roulette_probability;
+
+  Vector3 dir = u*r3*cos(r1) + v*r3*sin(r1) + w*r2;
+  dir.normalize();
+
+  income = Radiance(scene, Ray(intersect.hit.position, dir), rnd, depth+1);
+
+  weight = intersect.object->color / PI * r2 / pdf / russian_roulette_probability;
+  
+//  }
+
+  return intersect.object->emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
+}

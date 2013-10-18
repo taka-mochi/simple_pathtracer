@@ -24,23 +24,21 @@ public:
     const Vector3 &c = m_position;
 
     // ”»•ÊŽ®
-    Vector3 x_minus_c = x-c;
-    double v_dot_x_minus_c = v.dot(x_minus_c);
-    double D1 = v_dot_x_minus_c * v_dot_x_minus_c;
-    double D2 = v.lengthSq() * (x_minus_c.lengthSq() - m_radius*m_radius);
+    Vector3 c_minus_x = c-x;
+    double v_dot_c_minus_x = v.dot(c_minus_x);
+    double D1 = v_dot_c_minus_x * v_dot_c_minus_x;
+    double D2 = v.lengthSq() * (c_minus_x.lengthSq() - m_radius*m_radius);
     double D = D1 - D2;
     if (D < 0) return false;
 
     double sqrtD = sqrt(D);
-    double t1 = sqrtD - v_dot_x_minus_c;
-    double t2 = -sqrtD - v_dot_x_minus_c;
+    double t1 = sqrtD + v_dot_c_minus_x;
+    double t2 = -sqrtD + v_dot_c_minus_x;
 
-    if (t1 < 0 && t2 < 0) return false;
-
-    if (t1 < 0 && t2 > 0) hit.distance = t2;
-    else if (t1 > 0 && t2 < 0) hit.distance = t1;
-    else if (t1 < t2) hit.distance = t1;
-    else hit.distance = t2;
+    if (t1 <= EPS && t2 <= EPS) return false;
+    
+	if (t2 > EPS) hit.distance = t2;
+	else hit.distance = t1;
 
     hit.position = x + v * hit.distance;
     hit.normal = hit.position - m_position; hit.normal.normalize();

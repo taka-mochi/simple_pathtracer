@@ -20,7 +20,7 @@ public:
   }
 
   double nextDouble() {
-    return next()/UINT_MAX;
+    return static_cast<double>(next())/UINT_MAX;
   }
 
 private:

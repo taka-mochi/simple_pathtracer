@@ -9,7 +9,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-	int width = 640, height = 480;
+	int width = 320, height = 240;
 	PathTracer renderer(width, height, 4, 2);
 	CornellBoxScene scene;
 

@@ -22,13 +22,17 @@ private:
 public:
 	static void save(const std::string &filename, const Color *image, int width, int height) {
 		std::ofstream ofs(filename.c_str());
-    std::stringstream ss;
-		ss << "P3" << std::endl;
-		ss << width << " " << height << std::endl;
-		ss << 255 << std::endl;
-		for (int i=0; i<width*height; i++) {
-			ss << to_rgb(gammaRev(image[i].x)) << " " << to_rgb(gammaRev(image[i].y)) << " " << to_rgb(gammaRev(image[i].z)) << std::endl;
+		ofs << "P3" << std::endl;
+		ofs << width << " " << height << std::endl;
+		ofs << 255 << std::endl;
+    int i=0;
+		for (int y=0; y<height; y++) {
+      std::stringstream ss;
+      for (int x=0; x<width; x++) {
+  			ss << to_rgb(gammaRev(image[i].x)) << " " << to_rgb(gammaRev(image[i].y)) << " " << to_rgb(gammaRev(image[i].z)) << std::endl;
+        i++;
+      }
+      ofs << ss.str();
 		}
-    ofs << ss.str();
 	}
 };

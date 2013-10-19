@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <ctime>
 
 #include "renderer.h"
 #include "cornell_box_scene.h"
@@ -16,16 +17,20 @@ public:
   	cerr << "save ppm file for sample " << samples << " ..." << endl;
     char name[1024];
     sprintf(name, "result_%04d.ppm", samples);
+    clock_t begin,end;
+    begin = clock();
     PPM::save(name, img, w, h);
+    end = clock();
+    cerr << "saving time = " << (double)(end - begin)/CLOCKS_PER_SEC << endl;
   };
 };
 
 int main(int argc, char *argv[]) {
 
-	int width = 640, height = 480;
+	int width = 320, height = 240;
 	//PathTracer renderer(width, height, 16, 4);
   SavePPM_callback callback(width, height);
-  PathTracer renderer(width, height, 1, 1000, 4, &callback);
+  PathTracer renderer(width, height, 2, 2, 4, &callback);
 	CornellBoxScene scene;
 
 	cerr << "begin rendering..." << endl;

@@ -118,6 +118,11 @@ Color PathTracer::Radiance(const Scene &scene, const Ray &ray, Random &rnd, cons
   Vector3 normal = intersect.hit.normal.dot(ray.dir) < 0.0 ? intersect.hit.normal : intersect.hit.normal * -1.0;
   Color income;
 
+  // この if 文を有効にすると、直接光のみ考慮するようになる
+  //if (depth >= 1) {
+  //  return intersect.object->emission;
+  //}
+
   double russian_roulette_probability = std::max(intersect.object->color.x, std::max(intersect.object->color.y, intersect.object->color.z)); // 適当
   if (depth > MaxDepth) {
     russian_roulette_probability *= pow(0.5, depth-MaxDepth);
@@ -130,14 +135,18 @@ Color PathTracer::Radiance(const Scene &scene, const Ray &ray, Random &rnd, cons
     russian_roulette_probability = 1.0; // no roulette
   }
 
-   switch (intersect.object->reflection_type) {
-   case SceneObject::REFLECTION_TYPE_LAMBERT:
-     income = Radiance_Lambert(scene, ray, rnd, depth, intersect, normal, russian_roulette_probability);
-  // lambertian
+  switch (intersect.object->reflection_type) {
+    case SceneObject::REFLECTION_TYPE_LAMBERT:
+      income = Radiance_Lambert(scene, ray, rnd, depth, intersect, normal, russian_roulette_probability);
+      break;
+    case SceneObject::REFLECTION_TYPE_SPECULAR:
+      income = Radiance_Specular(scene, ray, rnd, depth, intersect, normal, russian_roulette_probability);
+      break;
+    case SceneObject::REFLECTION_TYPE_REFRACTION:
+      income = Radiance_Refraction(scene, ray, rnd, depth, intersect, normal, russian_roulette_probability);
+      break;
 
-
-
-   }
+  }
   
   
 //  }
@@ -180,4 +189,16 @@ Color PathTracer::Radiance_Lambert(const Scene &scene, const Ray &ray, Random &r
   Color weight = intersect.object->color / PI * r2 / pdf / russian_roulette_prob;
   Color income = Radiance(scene, Ray(intersect.hit.position, dir), rnd, depth+1);
   return intersect.object->emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
+}
+
+// 鏡面反射
+Color PathTracer::Radiance_Specular(const Scene &scene, const Ray &ray, Random &rnd, const int depth, Scene::IntersectionInformation &intersect, const Vector3 &normal, double russian_roulette_prob) {
+  Vector3 reflected_dir(ray.dir - normal*2*ray.dir.dot(normal));
+  reflected_dir.normalize();
+  return Radiance(scene, Ray(intersect.hit.position, reflected_dir), rnd, depth+1);
+}
+
+// 屈折面
+Color PathTracer::Radiance_Refraction(const Scene &scene, const Ray &ray, Random &rnd, const int depth, Scene::IntersectionInformation &intersect, const Vector3 &normal, double russian_roulette_prob) {
+  return Color(0.5,0.5,0);
 }

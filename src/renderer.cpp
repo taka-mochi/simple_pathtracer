@@ -200,5 +200,7 @@ Color PathTracer::Radiance_Specular(const Scene &scene, const Ray &ray, Random &
 
 // ‹üÜ–Ê
 Color PathTracer::Radiance_Refraction(const Scene &scene, const Ray &ray, Random &rnd, const int depth, Scene::IntersectionInformation &intersect, const Vector3 &normal, double russian_roulette_prob) {
+  bool into = intersect.hit.normal.dot(normal) > 0.0;
+
   return Color(0.5,0.5,0);
 }

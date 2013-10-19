@@ -9,6 +9,8 @@
 
 using namespace std;
 
+static const int supersampling = 4;
+
 class SavePPM_callback : public PathTracer::RenderingFinishCallback {
   int w,h;
 public:
@@ -16,7 +18,7 @@ public:
   void operator()(int samples, const Color *img) {
   	cerr << "save ppm file for sample " << samples << " ..." << endl;
     char name[1024];
-    sprintf(name, "result_%04d.ppm", samples);
+    sprintf(name, "result_%04d_%dx%d.ppm", samples, supersampling, supersampling);
     clock_t begin,end;
     begin = clock();
     PPM::save(name, img, w, h);
@@ -30,7 +32,7 @@ int main(int argc, char *argv[]) {
 	int width = 320, height = 240;
 	//PathTracer renderer(width, height, 16, 4);
   SavePPM_callback callback(width, height);
-  PathTracer renderer(width, height, 4, 64, 4, &callback);
+  PathTracer renderer(width, height, 16, 16, supersampling, &callback);
 	CornellBoxScene scene;
 
 	cerr << "begin rendering..." << endl;

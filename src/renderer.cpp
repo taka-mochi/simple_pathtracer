@@ -195,12 +195,65 @@ Color PathTracer::Radiance_Lambert(const Scene &scene, const Ray &ray, Random &r
 Color PathTracer::Radiance_Specular(const Scene &scene, const Ray &ray, Random &rnd, const int depth, Scene::IntersectionInformation &intersect, const Vector3 &normal, double russian_roulette_prob) {
   Vector3 reflected_dir(ray.dir - normal*2*ray.dir.dot(normal));
   reflected_dir.normalize();
-  return Radiance(scene, Ray(intersect.hit.position, reflected_dir), rnd, depth+1);
+  Color income = Radiance(scene, Ray(intersect.hit.position, reflected_dir), rnd, depth+1);
+  Color weight = intersect.object->color / russian_roulette_prob;
+  return intersect.object->emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
+
 }
 
 // 屈折面
 Color PathTracer::Radiance_Refraction(const Scene &scene, const Ray &ray, Random &rnd, const int depth, Scene::IntersectionInformation &intersect, const Vector3 &normal, double russian_roulette_prob) {
   bool into = intersect.hit.normal.dot(normal) > 0.0;
 
-  return Color(0.5,0.5,0);
+  Vector3 reflect_dir = ray.dir - normal*2*ray.dir.dot(normal);
+  reflect_dir.normalize();
+  double n_vacuum = REFRACTIVE_INDEX_VACUUM;
+  double n_obj = REFRACTIVE_INDEX_OBJECT;
+  double n_ratio = into ? n_vacuum/n_obj : n_obj/n_vacuum;
+
+  double dot = ray.dir.dot(normal);
+  double cos2t = 1-n_ratio*n_ratio*(1-dot*dot);
+
+  if (cos2t < 0) {
+    // 全反射
+    Color income = Radiance(scene, Ray(intersect.hit.position, reflect_dir), rnd, depth+1);
+    Color weight = intersect.object->color / russian_roulette_prob;
+    return intersect.object->emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
+  }
+
+  // 屈折方向
+  Vector3 refract_dir( (ray.dir - normal*dot)*n_ratio - normal*sqrt(cos2t) );
+  refract_dir.normalize();
+  const Ray refract_ray(intersect.hit.position, refract_dir);
+
+  // Fresnel の式
+  double F0 = (n_obj-n_vacuum)*(n_obj-n_vacuum)/((n_obj+n_vacuum)*(n_obj+n_vacuum));
+  double c = 1 - ( into ? -dot : -refract_dir.dot(normal) );  // 1-cosθ
+  double Fr = F0 + (1-F0)*pow(1-c, 5.0);    // Fresnel (反射の割合)
+  double n_ratio2 = n_ratio*n_ratio;  // 屈折前後での放射輝度の変化率
+  double Tr = (1-Fr)*n_ratio2;        // 屈折直後→直前の割合
+
+  Color income, weight;
+
+  if (depth > 2) {
+    // 反射 or 屈折のみ追跡
+    const double reflect_prob = 0.1 + 0.8 * Fr;
+    if (rnd.nextDouble() < reflect_prob) {
+      // 反射
+      income = Radiance(scene, Ray(intersect.hit.position, reflect_dir), rnd, depth+1) * Fr;
+      weight = intersect.object->color / (russian_roulette_prob * reflect_prob);
+    } else {
+      // 屈折
+      income = Radiance(scene, refract_ray, rnd, depth+1) * Tr;
+      weight = intersect.object->color / (russian_roulette_prob * (1-reflect_prob));
+    }
+  } else {
+    // 反射と屈折両方追跡
+    income =
+        Radiance(scene, Ray(intersect.hit.position, reflect_dir), rnd, depth+1) * Fr +
+        Radiance(scene, refract_ray, rnd, depth+1) * Tr;
+    weight = intersect.object->color / russian_roulette_prob;
+  }
+
+  return intersect.object->emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
 }

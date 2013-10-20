@@ -186,7 +186,8 @@ Color PathTracer::Radiance_Lambert(const Scene &scene, const Ray &ray, Random &r
   Vector3 dir = u*r3*cos(r1) + v*r3*sin(r1) + w*r2;
   dir.normalize();
 
-  Color weight = intersect.object->color / PI * r2 / pdf / russian_roulette_prob;
+  //Color weight = intersect.object->color / PI * r2 / pdf / russian_roulette_prob;
+  Color weight = intersect.object->color / russian_roulette_prob;
   Color income = Radiance(scene, Ray(intersect.hit.position, dir), rnd, depth+1);
   return intersect.object->emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
 }

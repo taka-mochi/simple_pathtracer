@@ -4,11 +4,12 @@
 #include "color.h"
 #include "ray.h"
 #include "hit.h"
+#include "material.h"
 
 class Sphere : public SceneObject {
 public:
-  Sphere(double r, const Vector3 &pos, const Color &emission_, const Color &color_, const REFLECTION_TYPE reflection_type_)
-    : SceneObject(color_, emission_, reflection_type_)
+  Sphere(double r, const Vector3 &pos, const Material &material_)
+    : SceneObject(material_)
     , m_position(pos)
     , m_radius(r)
   {

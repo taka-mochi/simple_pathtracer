@@ -123,26 +123,26 @@ Color PathTracer::Radiance(const Scene &scene, const Ray &ray, Random &rnd, cons
   //  return intersect.object->emission;
   //}
 
-  double russian_roulette_probability = std::max(intersect.object->color.x, std::max(intersect.object->color.y, intersect.object->color.z)); // ìKìñ
+  double russian_roulette_probability = std::max(intersect.object->material.color.x, std::max(intersect.object->material.color.y, intersect.object->material.color.z)); // ìKìñ
   if (depth > MaxDepth) {
     russian_roulette_probability *= pow(0.5, depth-MaxDepth);
   }
   if (depth > MinDepth) {
     if (rnd.nextDouble() >= russian_roulette_probability) {
-      return intersect.object->emission;
+      return intersect.object->material.emission;
     }
   } else {
     russian_roulette_probability = 1.0; // no roulette
   }
 
-  switch (intersect.object->reflection_type) {
-    case SceneObject::REFLECTION_TYPE_LAMBERT:
+  switch (intersect.object->material.reflection_type) {
+    case Material::REFLECTION_TYPE_LAMBERT:
       income = Radiance_Lambert(scene, ray, rnd, depth, intersect, normal, russian_roulette_probability);
       break;
-    case SceneObject::REFLECTION_TYPE_SPECULAR:
+    case Material::REFLECTION_TYPE_SPECULAR:
       income = Radiance_Specular(scene, ray, rnd, depth, intersect, normal, russian_roulette_probability);
       break;
-    case SceneObject::REFLECTION_TYPE_REFRACTION:
+    case Material::REFLECTION_TYPE_REFRACTION:
       income = Radiance_Refraction(scene, ray, rnd, depth, intersect, normal, russian_roulette_probability);
       break;
 
@@ -187,9 +187,9 @@ Color PathTracer::Radiance_Lambert(const Scene &scene, const Ray &ray, Random &r
   dir.normalize();
 
   //Color weight = intersect.object->color / PI * r2 / pdf / russian_roulette_prob;
-  Color weight = intersect.object->color / russian_roulette_prob;
+  Color weight = intersect.object->material.color / russian_roulette_prob;
   Color income = Radiance(scene, Ray(intersect.hit.position, dir), rnd, depth+1);
-  return intersect.object->emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
+  return intersect.object->material.emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
 }
 
 // ãæñ îΩéÀ
@@ -197,8 +197,8 @@ Color PathTracer::Radiance_Specular(const Scene &scene, const Ray &ray, Random &
   Vector3 reflected_dir(ray.dir - normal*2*ray.dir.dot(normal));
   reflected_dir.normalize();
   Color income = Radiance(scene, Ray(intersect.hit.position, reflected_dir), rnd, depth+1);
-  Color weight = intersect.object->color / russian_roulette_prob;
-  return intersect.object->emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
+  Color weight = intersect.object->material.color / russian_roulette_prob;
+  return intersect.object->material.emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
 
 }
 
@@ -209,7 +209,7 @@ Color PathTracer::Radiance_Refraction(const Scene &scene, const Ray &ray, Random
   Vector3 reflect_dir = ray.dir - normal*2*ray.dir.dot(normal);
   reflect_dir.normalize();
   double n_vacuum = REFRACTIVE_INDEX_VACUUM;
-  double n_obj = REFRACTIVE_INDEX_OBJECT;
+  double n_obj = intersect.object->material.refraction_rate;
   double n_ratio = into ? n_vacuum/n_obj : n_obj/n_vacuum;
 
   double dot = ray.dir.dot(normal);
@@ -218,8 +218,8 @@ Color PathTracer::Radiance_Refraction(const Scene &scene, const Ray &ray, Random
   if (cos2t < 0) {
     // ëSîΩéÀ
     Color income = Radiance(scene, Ray(intersect.hit.position, reflect_dir), rnd, depth+1);
-    Color weight = intersect.object->color / russian_roulette_prob;
-    return intersect.object->emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
+    Color weight = intersect.object->material.color / russian_roulette_prob;
+    return intersect.object->material.emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
   }
 
   // ã¸ê‹ï˚å¸
@@ -242,19 +242,19 @@ Color PathTracer::Radiance_Refraction(const Scene &scene, const Ray &ray, Random
     if (rnd.nextDouble() < reflect_prob) {
       // îΩéÀ
       income = Radiance(scene, Ray(intersect.hit.position, reflect_dir), rnd, depth+1) * Fr;
-      weight = intersect.object->color / (russian_roulette_prob * reflect_prob);
+      weight = intersect.object->material.color / (russian_roulette_prob * reflect_prob);
     } else {
       // ã¸ê‹
       income = Radiance(scene, refract_ray, rnd, depth+1) * Tr;
-      weight = intersect.object->color / (russian_roulette_prob * (1-reflect_prob));
+      weight = intersect.object->material.color / (russian_roulette_prob * (1-reflect_prob));
     }
   } else {
     // îΩéÀÇ∆ã¸ê‹óºï˚í«ê’
     income =
         Radiance(scene, Ray(intersect.hit.position, reflect_dir), rnd, depth+1) * Fr +
         Radiance(scene, refract_ray, rnd, depth+1) * Tr;
-    weight = intersect.object->color / russian_roulette_prob;
+    weight = intersect.object->material.color / russian_roulette_prob;
   }
 
-  return intersect.object->emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
+  return intersect.object->material.emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
 }

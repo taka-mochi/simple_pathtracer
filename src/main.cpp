@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 	int width = 640, height = 480;
 	//PathTracer renderer(width, height, 16, 4);
   SavePPM_callback callback(width, height);
-  PathTracer renderer(width, height, 16, 16, supersampling, &callback);
+  PathTracer renderer(width, height, 4, 4, supersampling, &callback);
 	CornellBoxScene scene;
 
 	cerr << "begin rendering..." << endl;

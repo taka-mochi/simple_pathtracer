@@ -17,7 +17,7 @@ private:
 		return pow(clamp(x), 1.0/2.2);
 	}
 	static double to_rgb(double v_0_1) {
-		return static_cast<int>(v_0_1 * 255 * 0.5);
+		return static_cast<int>(v_0_1 * 255 + 0.5);
 	}
 public:
 	static void save(const std::string &filename, const Color *image, int width, int height) {

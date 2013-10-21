@@ -29,7 +29,7 @@ public:
 
 int main(int argc, char *argv[]) {
 
-	int width = 320, height = 240;
+	int width = 640, height = 480;
 	//PathTracer renderer(width, height, 16, 4);
   SavePPM_callback callback(width, height);
   PathTracer renderer(width, height, 4, 4, supersampling, &callback);

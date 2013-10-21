@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cassert>
+#include <sstream>
 
 class Vector3 {
 public:
@@ -45,6 +46,9 @@ public:
 		z /= v;
 		return *this;
 	}
+  bool operator == (const Vector3 &vec) const {
+    return x == vec.x && y == vec.y && z == vec.z;
+  }
   Vector3 operator * (double v) const {
     return Vector3(x*v, y*v, z*v);
   }
@@ -77,4 +81,10 @@ public:
 	void normalize() {
 		(*this) /= length();
 	}
+
+  std::string toString() const {
+    std::stringstream ss;
+    ss << x << "," << y << "," << z;
+    return ss.str();
+  }
 };

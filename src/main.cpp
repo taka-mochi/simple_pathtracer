@@ -4,8 +4,10 @@
 
 #include "renderer.h"
 #include "cornell_box_scene.h"
+#include "test_scene.h"
 #include "vector.h"
 #include "ppm.h"
+#include "model.h"
 
 using namespace std;
 
@@ -33,7 +35,7 @@ int main(int argc, char *argv[]) {
 	//PathTracer renderer(width, height, 16, 4);
   SavePPM_callback callback(width, height);
   PathTracer renderer(width, height, 4, 4, supersampling, &callback);
-	CornellBoxScene scene;
+	TestScene scene;
 
 	cerr << "begin rendering..." << endl;
 	renderer.RenderScene(scene);

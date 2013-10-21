@@ -41,7 +41,7 @@ bool Model::readFromObj(const std::string &filename) {
   const static std::string defaultMaterialName = "__default__material__";
 
   std::unordered_map<string, Material> materialNames;
-  materialNames[defaultMaterialName] = Material(Material::REFLECTION_TYPE_LAMBERT, Vector3(0,0,0), Vector3(0.99, 0.99, 0.99));
+  materialNames[defaultMaterialName] = Material(Material::REFLECTION_TYPE_LAMBERT, Vector3(0,0,0), Vector3(0.99, 0, 0));
   m_meshes[materialNames[defaultMaterialName]] = PolygonList();
 
   string currentMaterialName = defaultMaterialName;
@@ -127,12 +127,18 @@ bool Model::readFromObj(const std::string &filename) {
     }
   }
 
+  unordered_map<string, Material>::iterator it,end = materialNames.end();
+  m_materials.clear();
+  for (it=materialNames.begin(); it!=end; it++) {
+    m_materials.push_back(it->second);
+  }
+
   return true;
 }
 
-std::vector<Model::PolygonPtr> Model::load4verticesFace(const vector<string> &face, vector<Vector3> verticesInGroup, 
-  vector<Vector3> normalsInGroup, 
-  vector<Vector3> uvCoordinatesInGroup, const Material &mat) {
+std::vector<Model::PolygonPtr> Model::load4verticesFace(const vector<string> &face, const vector<Vector3> &verticesInGroup, 
+  const vector<Vector3> &normalsInGroup, 
+  const vector<Vector3> &uvCoordinatesInGroup, const Material &mat) {
   vector<string> face1, face2;
   face1.push_back(face[0]); face1.push_back(face[1]); face1.push_back(face[2]);
   face2.push_back(face[0]); face2.push_back(face[2]); face2.push_back(face[3]);
@@ -145,9 +151,9 @@ std::vector<Model::PolygonPtr> Model::load4verticesFace(const vector<string> &fa
   return ret;
 }
 
-Model::PolygonPtr Model::load3verticesFace(const vector<string> &face, vector<Vector3> verticesInGroup, 
-  vector<Vector3> normalsInGroup, 
-  vector<Vector3> uvCoordinatesInGroup, const Material &mat) {
+Model::PolygonPtr Model::load3verticesFace(const vector<string> &face, const vector<Vector3> &verticesInGroup, 
+  const vector<Vector3> &normalsInGroup, 
+  const vector<Vector3> &uvCoordinatesInGroup, const Material &mat) {
   Vector3 vec[3], normals[3];
 
   for (size_t i=0; i<face.size(); i++) {
@@ -164,9 +170,12 @@ Model::PolygonPtr Model::load3verticesFace(const vector<string> &face, vector<Ve
     }
 
     assert (vertex_number != -1);
-    vec[face.size()-i-1] = verticesInGroup[vertex_number];
+    size_t index = face.size()-i-1;
+    vec[index] = verticesInGroup[vertex_number];
+    vec[index].z *= -1;
     if (normal_number != -1) {
-      normals[face.size()-i-1] = normalsInGroup[normal_number];
+      normals[index] = normalsInGroup[normal_number];
+      normals[index].z *= -1;
     }
   }
 

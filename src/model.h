@@ -17,6 +17,13 @@ public:
   Model();
   ~Model();
 
+  void setPosition(const Vector3 &pos) {
+    m_position = pos;
+  }
+  const Vector3 &getPosition() const {
+    return m_position;
+  }
+
   bool readFromObj(const std::string &filename);
 
   size_t getMaterialCount() const {
@@ -32,16 +39,19 @@ public:
 private:
   void clear();
   std::vector<PolygonPtr> Model::load4verticesFace(const std::vector<std::string> &face,
-    std::vector<Vector3> verticesInGroup, 
-    std::vector<Vector3> normalsInGroup, 
-    std::vector<Vector3> uvCoordinatesInGroup,
+    const std::vector<Vector3> &verticesInGroup, 
+    const std::vector<Vector3> &normalsInGroup, 
+    const std::vector<Vector3> &uvCoordinatesInGroup,
     const Material &mat);
-  PolygonPtr Model::load3verticesFace(const std::vector<std::string> &face, std::vector<Vector3> verticesInGroup, 
-    std::vector<Vector3> normalsInGroup, 
-    std::vector<Vector3> uvCoordinatesInGroup,
+  PolygonPtr Model::load3verticesFace(const std::vector<std::string> &face,
+    const std::vector<Vector3> &verticesInGroup, 
+    const std::vector<Vector3> &normalsInGroup, 
+    const std::vector<Vector3> &uvCoordinatesInGroup,
     const Material &mat);
 
 private:
   std::vector<Material> m_materials;
   std::unordered_map<Material, PolygonList, MaterialHash, MaterialEq> m_meshes;
+
+  Vector3 m_position;
 };

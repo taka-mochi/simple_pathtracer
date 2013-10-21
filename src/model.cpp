@@ -74,7 +74,9 @@ bool Model::readFromObj(const std::string &filename) {
       // comment
     } else if (line.find("mtllib ") == 0) {
       // material name
-      materialNames[line.substr(string("mtllib ").length())] = Material(Material::REFLECTION_TYPE_LAMBERT, Vector3(0,0,0), Vector3(0.99,0.99,0.99));
+      static int index=0;
+      materialNames[line.substr(string("mtllib ").length())] = Material(Material::REFLECTION_TYPE_LAMBERT, Vector3(0,0,0), Vector3(0.999+index*0.001,0.99,0.99));
+      index++;
       // materialÇÉçÅ[ÉhÇ∑ÇÈ
 
     } else if (line.find("g ") == 0) {
@@ -88,6 +90,9 @@ bool Model::readFromObj(const std::string &filename) {
     } else if (line.find("usemtl ") == 0) {
       // current material name
       currentMaterialName = line.substr(string("usemtl ").length());
+      if (materialNames.find(currentMaterialName) == materialNames.end()) {
+        currentMaterialName = defaultMaterialName;
+      }
       currentMaterial = &materialNames[currentMaterialName];
       if (m_meshes.find(*currentMaterial) != m_meshes.end()) {
         currentPolygonList = &m_meshes[*currentMaterial];
@@ -205,7 +210,7 @@ Model::PolygonPtr Model::load3verticesFace(const vector<string> &face, const vec
     ret_p = ( new Polygon(vec[0], vec[1], vec[2], Polygon::calculateNormal(vec[0], vec[1], vec[2]), mat, Vector3(0,0,0)) );
   } else {
     averaged_normal /= 3.0;
-    ret_p = ( new Polygon(vec[0], vec[1], vec[2], averaged_normal, mat, Vector3(0,0,0)) );
+    ret_p = ( new Polygon(vec[0], vec[1], vec[2], averaged_normal*-1, mat, Vector3(0,0,0)) );
   }
 
   return ret_p;

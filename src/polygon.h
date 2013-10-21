@@ -7,13 +7,14 @@
 
 class Polygon : public SceneObject {
 public:
-  Polygon(const Vector3 &pos1, const Vector3 &pos2, const Vector3 &pos3, const Vector3 &normal, const Material &mat)
+  Polygon(const Vector3 &pos1, const Vector3 &pos2, const Vector3 &pos3, const Vector3 &normal, const Material &mat, const Vector3 &pos)
     : SceneObject(mat)
     , m_normal(normal)
   {
     m_pos[0] = pos1;
     m_pos[1] = pos2;
     m_pos[2] = pos3;
+    position = pos;
   }
   Polygon(const Polygon &polygon)
     : SceneObject(polygon.material)
@@ -40,7 +41,7 @@ public:
 
     if (det > EPS) {
       // solve u
-      Vector3 T(ray.begin - m_pos[0]);
+      Vector3 T(ray.begin - (m_pos[0]+position));
       double u = P.dot(T);
 
       if (u>=0 && u<= det) {

@@ -17,9 +17,7 @@ public:
   Model();
   ~Model();
 
-  void setPosition(const Vector3 &pos) {
-    m_position = pos;
-  }
+  void setPosition(const Vector3 &pos);
   const Vector3 &getPosition() const {
     return m_position;
   }

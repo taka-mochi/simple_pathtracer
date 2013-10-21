@@ -31,6 +31,18 @@ void Model::clear()
   m_meshes.clear();
 }
 
+void Model::setPosition(const Vector3 &pos) {
+  m_position = pos;
+
+  std::vector<Material>::iterator it, end = m_materials.end();
+  for (it = m_materials.begin(); it!=end; it++) {
+    PolygonList l = getPolygonList(*it);
+    for (size_t i=0; i<l.size(); i++) {
+      l[i]->position = pos;
+    }
+  }
+}
+
 bool Model::readFromObj(const std::string &filename) {
   ifstream ifs(filename.c_str());
 
@@ -41,7 +53,7 @@ bool Model::readFromObj(const std::string &filename) {
   const static std::string defaultMaterialName = "__default__material__";
 
   std::unordered_map<string, Material> materialNames;
-  materialNames[defaultMaterialName] = Material(Material::REFLECTION_TYPE_LAMBERT, Vector3(0,0,0), Vector3(0.99, 0, 0));
+  materialNames[defaultMaterialName] = Material(Material::REFLECTION_TYPE_LAMBERT, Vector3(0,0,0), Vector3(0.99, 0.99, 0.99));
   m_meshes[materialNames[defaultMaterialName]] = PolygonList();
 
   string currentMaterialName = defaultMaterialName;
@@ -160,6 +172,9 @@ Model::PolygonPtr Model::load3verticesFace(const vector<string> &face, const vec
     vector<string> data(Utils::split(face[i], '/'));
 
     int vertex_number = -1; int uv_numver = -1; int normal_number = -1;
+    if (data.size() == 1) {
+      vertex_number = atoi(data[0].c_str())-1;
+    }
     if (data.size() == 2) {
       vertex_number = atoi(data[0].c_str())-1;
       uv_numver = atoi(data[1].c_str())-1;
@@ -170,12 +185,12 @@ Model::PolygonPtr Model::load3verticesFace(const vector<string> &face, const vec
     }
 
     assert (vertex_number != -1);
-    size_t index = face.size()-i-1;
+    size_t index = i;
     vec[index] = verticesInGroup[vertex_number];
-    vec[index].z *= -1;
+    //vec[index].z *= -1;
     if (normal_number != -1) {
       normals[index] = normalsInGroup[normal_number];
-      normals[index].z *= -1;
+      //normals[index].z *= -1;
     }
   }
 
@@ -187,10 +202,10 @@ Model::PolygonPtr Model::load3verticesFace(const vector<string> &face, const vec
   PolygonPtr ret_p;
   if (averaged_normal.x == 0 && averaged_normal.y == 0 && averaged_normal.z == 0) {
     // normal ‚ÌŽw’è‚È‚©‚Á‚½
-    ret_p = ( new Polygon(vec[0], vec[1], vec[2], Polygon::calculateNormal(vec[0], vec[1], vec[2]), mat) );
+    ret_p = ( new Polygon(vec[0], vec[1], vec[2], Polygon::calculateNormal(vec[0], vec[1], vec[2]), mat, Vector3(0,0,0)) );
   } else {
     averaged_normal /= 3.0;
-    ret_p = ( new Polygon(vec[0], vec[1], vec[2], averaged_normal, mat) );
+    ret_p = ( new Polygon(vec[0], vec[1], vec[2], averaged_normal, mat, Vector3(0,0,0)) );
   }
 
   return ret_p;

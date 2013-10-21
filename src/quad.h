@@ -5,12 +5,12 @@
 
 class Quad : public SceneObject {
 public:
-  Quad(const Vector3 &anticlockwise_v0, const Vector3 &anticlockwise_v1, const Vector3 &anticlockwise_v2, const Vector3 &anticlockwise_v3, const Material &mat)
+  Quad(const Vector3 &anticlockwise_v0, const Vector3 &anticlockwise_v1, const Vector3 &anticlockwise_v2, const Vector3 &anticlockwise_v3, const Material &mat, const Vector3 &pos)
     : SceneObject(mat)
   {
     Vector3 normal(Polygon::calculateNormal(anticlockwise_v0, anticlockwise_v1, anticlockwise_v2));
-    polygon[0] = new Polygon(anticlockwise_v0, anticlockwise_v1, anticlockwise_v2, normal, mat);
-    polygon[1] = new Polygon(anticlockwise_v0, anticlockwise_v2, anticlockwise_v3, normal, mat);
+    polygon[0] = new Polygon(anticlockwise_v0, anticlockwise_v1, anticlockwise_v2, normal, mat, pos);
+    polygon[1] = new Polygon(anticlockwise_v0, anticlockwise_v2, anticlockwise_v3, normal, mat, pos);
   }
   Quad(const Quad &quad)
     : SceneObject(quad.material)

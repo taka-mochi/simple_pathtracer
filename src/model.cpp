@@ -125,7 +125,7 @@ bool Model::readFromObj(const std::string &filename) {
     } else if (line.find("f ") == 0) {
       // face
       vector<string> faces = Utils::split(line.substr(string("f ").length()), ' ');
-      if (faces.size() >= 5 || faces.size() < 3) {
+      if (faces.size() >= 5) {
         cerr << "5 or more vertices faces are not supported!!!: " << line << endl;
         return false;
       } else if (faces.size() == 4) {

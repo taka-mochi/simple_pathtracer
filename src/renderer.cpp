@@ -120,7 +120,7 @@ Color PathTracer::Radiance(const Scene &scene, const Ray &ray, Random &rnd, cons
 
   // この if 文を有効にすると、直接光のみ考慮するようになる
   //if (depth >= 1) {
-  //  return intersect.object->emission;
+  //  return intersect.object->material.emission;
   //}
 
   double russian_roulette_probability = std::max(intersect.object->material.color.x, std::max(intersect.object->material.color.y, intersect.object->material.color.z)); // 適当

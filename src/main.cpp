@@ -11,7 +11,7 @@
 
 using namespace std;
 
-static const int supersampling = 4;
+static const int supersampling = 2;
 
 class SavePPM_callback : public PathTracer::RenderingFinishCallback {
   int w,h;

@@ -36,12 +36,13 @@ public:
 
 private:
   void clear();
-  std::vector<PolygonPtr> Model::load4verticesFace(const std::vector<std::string> &face,
+  bool loadMaterialFile(const std::string &filename, std::unordered_map<std::string, Material> &materials);
+  std::vector<PolygonPtr> load4verticesFace(const std::vector<std::string> &face,
     const std::vector<Vector3> &verticesInGroup, 
     const std::vector<Vector3> &normalsInGroup, 
     const std::vector<Vector3> &uvCoordinatesInGroup,
     const Material &mat);
-  PolygonPtr Model::load3verticesFace(const std::vector<std::string> &face,
+  PolygonPtr load3verticesFace(const std::vector<std::string> &face,
     const std::vector<Vector3> &verticesInGroup, 
     const std::vector<Vector3> &normalsInGroup, 
     const std::vector<Vector3> &uvCoordinatesInGroup,

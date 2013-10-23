@@ -74,10 +74,14 @@ bool Model::readFromObj(const std::string &filename) {
       // comment
     } else if (line.find("mtllib ") == 0) {
       // material name
-      static int index=0;
-      materialNames[line.substr(string("mtllib ").length())] = Material(Material::REFLECTION_TYPE_LAMBERT, Vector3(0,0,0), Vector3(0.999+index*0.001,0.99,0.99));
-      index++;
+      //static int index=0;
+      //materialNames[line.substr(string("mtllib ").length())] = Material(Material::REFLECTION_TYPE_LAMBERT, Vector3(0,0,0), Vector3(0.999+index*0.001,0.99,0.99));
+      //index++;
       // materialÇÉçÅ[ÉhÇ∑ÇÈ
+      if (!loadMaterialFile(line.substr(string("mtlib ").length()+1), materialNames)) {
+        cerr << "failed to load material file: " << line.substr(string("mtlib ").length()) << endl;
+        return false;
+      }
 
     } else if (line.find("g ") == 0) {
       // group name
@@ -149,6 +153,103 @@ bool Model::readFromObj(const std::string &filename) {
   for (it=materialNames.begin(); it!=end; it++) {
     m_materials.push_back(it->second);
   }
+
+  return true;
+}
+
+bool Model::loadMaterialFile(const std::string &filename, std::unordered_map<string, Material> &materials) {
+  ifstream ifs(filename.c_str());
+
+  if (!ifs) return false;
+
+  string currentMaterialName = "";
+  Material currentMaterial;
+
+  Color ambient, diffuse, specular;
+
+  while (!ifs.eof()) {
+    string line;
+    getline(ifs, line);
+
+    if (line.find("#") == 0) {
+      // comment
+    } else if (line.find("newmtl ") == 0) {
+      // new material
+      if (currentMaterialName != "") {
+        // register current material
+        switch (currentMaterial.reflection_type) {
+        case Material::REFLECTION_TYPE_LAMBERT:
+        case Material::REFLECTION_TYPE_REFRACTION:
+          currentMaterial.color = diffuse;
+          break;
+        case Material::REFLECTION_TYPE_SPECULAR:
+          currentMaterial.color = specular;
+          break;
+        }
+        materials[currentMaterialName] = currentMaterial;
+      }
+      currentMaterialName = line.substr(string("newmtl ").length());
+    } else if (line.find("Ns ") == 0) {
+      // Shininess
+      // ignore
+    } else if (line.find("d ") == 0) {
+      // ???
+    } else if (line.find("Ni ") == 0) {
+      // ???
+    } else if (line.find("illum ") == 0) {
+      // type
+      // 0: no diffuse
+      // 1: diffuse & ambient (but ambient is ignored)
+      // 2: specular (original setting: full lighting)
+      // 3: refractance REFRACTANCE ratio
+      vector<string> values(Utils::split(line.substr(string("illum ").length()), ' '));
+      string value = values[0];
+      switch (atoi(value.c_str())) {
+      case 0:
+      case 1:
+        currentMaterial.reflection_type = Material::REFLECTION_TYPE_LAMBERT;
+        break;
+      case 2:
+        currentMaterial.reflection_type = Material::REFLECTION_TYPE_SPECULAR;
+        break;
+      case 3:
+        assert (values.size() == 2);
+        currentMaterial.reflection_type = Material::REFLECTION_TYPE_REFRACTION;
+        currentMaterial.refraction_rate = atof(values[1].c_str());
+        break;
+      }
+    } else if (line.find("Ka ") == 0) {
+      // ambient color
+      // ignore
+    } else if (line.find("Kd ") == 0) {
+      // diffuse color
+      vector<string> values(Utils::split(line.substr(string("Kd ").length()), ' '));
+      assert (values.size() == 3);
+      diffuse.x = atof(values[0].c_str());
+      diffuse.y = atof(values[1].c_str());
+      diffuse.z = atof(values[2].c_str());
+    } else if (line.find("Ks ") == 0) {
+      // specular color
+      vector<string> values(Utils::split(line.substr(string("Ks ").length()), ' '));
+      assert (values.size() == 3);
+      specular.x = atof(values[0].c_str());
+      specular.y = atof(values[1].c_str());
+      specular.z = atof(values[2].c_str());
+    } else if (line.find("map_Kd ") == 0) {
+      // texture name
+    }
+  }
+
+  switch (currentMaterial.reflection_type) {
+  case Material::REFLECTION_TYPE_LAMBERT:
+  case Material::REFLECTION_TYPE_REFRACTION:
+    currentMaterial.color = diffuse;
+    break;
+  case Material::REFLECTION_TYPE_SPECULAR:
+    currentMaterial.color = specular;
+    break;
+  }
+  materials[currentMaterialName] = currentMaterial;
 
   return true;
 }

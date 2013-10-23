@@ -19,4 +19,5 @@ public:
 
   Material material;
   Vector3 position;
+
 };

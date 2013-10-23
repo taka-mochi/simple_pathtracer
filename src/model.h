@@ -8,6 +8,8 @@
 #include "polygon.h"
 #include "quad.h"
 
+class Matrix;
+
 class Model {
 public:
   typedef Polygon * PolygonPtr;
@@ -21,6 +23,7 @@ public:
   const Vector3 &getPosition() const {
     return m_position;
   }
+  void setRotation(const Matrix &matrix);
 
   bool readFromObj(const std::string &filename);
 

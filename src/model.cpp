@@ -4,6 +4,8 @@
 #include "polygon.h"
 #include "quad.h"
 #include "utils.h"
+#include "matrix.h"
+
 
 using namespace std;
 
@@ -39,6 +41,16 @@ void Model::setPosition(const Vector3 &pos) {
     PolygonList l = getPolygonList(*it);
     for (size_t i=0; i<l.size(); i++) {
       l[i]->position = pos;
+    }
+  }
+}
+
+void Model::setRotation(const Matrix &matrix) {
+  std::vector<Material>::iterator it, end = m_materials.end();
+  for (it = m_materials.begin(); it!=end; it++) {
+    PolygonList l = getPolygonList(*it);
+    for (size_t i=0; i<l.size(); i++) {
+      l[i]->setRotation(matrix);
     }
   }
 }

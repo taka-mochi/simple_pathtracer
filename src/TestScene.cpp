@@ -29,6 +29,7 @@ TestScene::TestScene()
     getchar();
     exit(-1);
   }
+  cube->setRotation(Matrix::rotateAroundVector(Vector3(0,1,0), 30.0/180*PI));
   cube->setPosition(Vector3(50,10,80));
   addModel(cube);
 

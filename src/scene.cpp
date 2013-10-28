@@ -33,10 +33,9 @@ bool Scene::CheckIntersection(const Ray &ray, IntersectionInformation &info) con
     m_bvh->CheckIntersection(ray, info);
   }
 
-  for (size_t i=0; i<m_objects.size(); i++) {
-    bool check = m_bvh == NULL || !m_objects[i].inBVH;
-    if (!check) continue;
-    SceneObject *obj = m_objects[i].object;
+  std::vector<SceneObject *>::const_iterator it,end = m_notInBVHObjects.end();
+  for (it = m_notInBVHObjects.begin(); it!=end; it++) {
+    SceneObject *obj = *it;
     HitInformation hit;
     if (obj->Intersect(ray, hit)) {
       if (info.hit.distance > hit.distance) {

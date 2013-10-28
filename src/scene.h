@@ -24,12 +24,14 @@ public:
   bool CheckIntersection(const Ray &ray, IntersectionInformation &info) const;
 
 protected:
-  Scene() : m_objects(), m_models(), m_inBVHObjects(), m_bvh(NULL) {}
+  Scene() : m_objects(), m_models(), m_inBVHObjects(), m_notInBVHObjects(), m_bvh(NULL) {}
 
   void addObject(SceneObject *obj, bool doDelete = true, bool containedInBVH = true) {
     m_objects.push_back(SceneObjectInfo(obj, doDelete, containedInBVH));
     if (containedInBVH) {
       m_inBVHObjects.push_back(obj);
+    } else {
+      m_notInBVHObjects.push_back(obj);
     }
   }
 
@@ -41,9 +43,6 @@ protected:
       const Model::PolygonList &pl = obj->getPolygonList(mat);
       for (size_t j=0; j<pl.size(); j++) {
         addObject(pl[j], false, containedInBVH);
-        if (containedInBVH) {
-          m_inBVHObjects.push_back(pl[j]);
-        }
       }
     }
   }
@@ -70,6 +69,7 @@ protected:
   };
 
   std::vector<SceneObject *> m_inBVHObjects;
+  std::vector<SceneObject *> m_notInBVHObjects;
   std::vector<SceneObjectInfo> m_objects;
   std::vector<ModelObjectInfo> m_models;
 

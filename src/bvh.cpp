@@ -2,9 +2,11 @@
 #include "bvh.h"
 #include <stack>
 #include <algorithm>
+#include <emmintrin.h>
 
 using namespace std;
 
+//#pragma pack(push,4)
 class BVH::BVH_structure {
 public:
   BoundingBox box;
@@ -12,6 +14,7 @@ public:
   //BVH_structure *children[2];
   std::vector<SceneObject *> objects;
 };
+//#pragma pack(pop)
 
 BVH::~BVH()
 {

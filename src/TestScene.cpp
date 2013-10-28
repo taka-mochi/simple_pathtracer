@@ -24,23 +24,21 @@ TestScene::TestScene()
   addObject(new Sphere(1e5, Vector3(50,  1e5,      81.6), Material(Material::REFLECTION_TYPE_LAMBERT, Color(), Color(0.75, 0.75, 0.75))), true, false);  // â∫
   addObject(new Sphere(1e5, Vector3(50, -1e5+81.6, 81.6), Material(Material::REFLECTION_TYPE_LAMBERT, Color(), Color(0.75, 0.75, 0.75))), true, false);  // è„
 
- /* Model *cube = new Model;
+  Model *cube = new Model;
   if (!cube->readFromObj("torii.obj")) {
     std::cerr << "failed to load cube.obj!!!" << std::endl;
     getchar();
     exit(-1);
   }
-  cube->setRotation(Matrix::rotateAroundVector(Vector3(0,1,0), 30.0/180*PI));
-  cube->setPosition(Vector3(50,10,80));
-  addModel(cube);*/
-
+  cube->setTransform(Vector3(50,10,80), Matrix::rotateAroundVector(Vector3(0,1,0), 30.0/180*PI));
+  addModel(cube);
   
-  addObject(new Sphere(10,Vector3(),           Material(Material::REFLECTION_TYPE_LAMBERT,    Color(), Color(0.25, 0.75, 0.25))));    // óŒãÖ
-  addObject(new Sphere(16.5,Vector3(27, 16.5, 47),       Material(Material::REFLECTION_TYPE_SPECULAR,   Color(), Color(0.99, 0.99, 0.99))));   // ãæ
-  addObject(new Sphere(16.5,Vector3(77, 16.5, 78),       Material(Material::REFLECTION_TYPE_REFRACTION, Color(), Color(0.99, 0.99, 0.99), REFRACTIVE_INDEX_OBJECT))); // ÉKÉâÉX
+  //addObject(new Sphere(10,Vector3(),           Material(Material::REFLECTION_TYPE_LAMBERT,    Color(), Color(0.25, 0.75, 0.25))));    // óŒãÖ
+  //addObject(new Sphere(16.5,Vector3(27, 16.5, 47),       Material(Material::REFLECTION_TYPE_SPECULAR,   Color(), Color(0.99, 0.99, 0.99))));   // ãæ
+  //addObject(new Sphere(16.5,Vector3(77, 16.5, 78),       Material(Material::REFLECTION_TYPE_REFRACTION, Color(), Color(0.99, 0.99, 0.99), REFRACTIVE_INDEX_OBJECT))); // ÉKÉâÉX
 
 
-	addObject(new Sphere(15.0,Vector3(50.0, 90.0, 81.6),   Material(Material::REFLECTION_TYPE_LAMBERT, Color(36,36,36), Color())), false);    // è∆ñæ
+	addObject(new Sphere(15.0,Vector3(50.0, 90.0, 81.6),   Material(Material::REFLECTION_TYPE_LAMBERT, Color(36,36,36), Color())), true, false);    // è∆ñæ
 
-  ConstructBVH();
+  //ConstructBVH();
 }

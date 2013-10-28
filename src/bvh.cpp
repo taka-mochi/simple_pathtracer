@@ -66,9 +66,9 @@ bool BVH::CheckIntersection(const Ray &ray, Scene::IntersectionInformation &info
           next_list.push(&m_root[next->children[1]]);
         }
       } else if (hit1) {
-          next_list.push(&m_root[next->children[0]]);
+        next_list.push(&m_root[next->children[0]]);
       } else if (hit2) {
-          next_list.push(&m_root[next->children[1]]);
+        next_list.push(&m_root[next->children[1]]);
       }
     }
   }

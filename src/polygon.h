@@ -36,9 +36,10 @@ public:
     return v;
   }
 
-  void setRotation(const Matrix &matrix) {
+  void setTransform(const Vector3 &pos, const Matrix &rot) {
+    position = pos;
     for (int i=0; i<3; i++) {
-      m_rotatedPos[i] = matrix.apply(m_pos[i]);
+      m_rotatedPos[i] = rot.apply(m_pos[i]);
     }
     reconstruct_boundingbox();
   }

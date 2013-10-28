@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ctime>
 #include "color.h"
 #include "scene.h"
 #include "renderer.h"
@@ -56,9 +57,13 @@ void PathTracer::RenderScene(const Scene &scene) {
 
   int previous_samples = 0;
   for (int samples=m_min_samples; samples<=m_max_samples; samples++) {
+    clock_t t1, t2;
+    t1 = clock();
     ScanPixelsAndCastRays(scene, screen_x, screen_y, screen_center, previous_samples, samples);
+    t2 = clock();
     previous_samples = samples;
     cerr << "samples = " << samples << " rendering finished." << endl;
+    cerr << "rendering time = " << (1.0/60)*(t2-t1)/CLOCKS_PER_SEC << " min." << endl;
     if (m_renderFinishCallback) {
       (*m_renderFinishCallback)(samples, m_result);
     }
@@ -72,7 +77,6 @@ void PathTracer::ScanPixelsAndCastRays(const Scene &scene, const Vector3 &screen
 #pragma omp parallel for
   for (int y=0; y<m_height; y++) {
     Random rnd(y+1+previous_samples*m_height);
-    cerr << "y = " << y << endl; 
     for (int x=0; x<m_width; x++) {
       const int index = x + (m_height - y - 1)*m_width;
 
@@ -99,7 +103,7 @@ void PathTracer::ScanPixelsAndCastRays(const Scene &scene, const Vector3 &screen
       m_result[index] = m_result[index] * (static_cast<double>(previous_samples) / next_samples) + accumulated_radiance / averaging_factor;
     }
     processed_y_counts++;
-    cerr << static_cast<double>(processed_y_counts)/m_height*100 << "% finished" << endl;
+    cerr << "y = " << y << ": " << static_cast<double>(processed_y_counts)/m_height*100 << "% finished" << endl;
 
   }
 }

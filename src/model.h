@@ -19,11 +19,12 @@ public:
   Model();
   ~Model();
 
-  void setPosition(const Vector3 &pos);
+  //void setPosition(const Vector3 &pos);
   const Vector3 &getPosition() const {
     return m_position;
   }
-  void setRotation(const Matrix &matrix);
+  void setTransform(const Vector3 &pos, const Matrix &rot);
+  //void setRotation(const Matrix &matrix);
 
   bool readFromObj(const std::string &filename);
 

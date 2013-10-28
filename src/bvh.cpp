@@ -86,10 +86,13 @@ void BVH::Construct(const BVH::CONSTRUCTION_TYPE type, const std::vector<SceneOb
     delete [] m_root;
   }
 
+  // how many nodes are required????
+  // Should I use dynamic array (vector)???
+
   //m_root = new BVH_structure[targets.size()*targets.size()+1]; // max size is 2*N+1
-  m_root = new BVH_structure[4*targets.size()+1]; // max size is 2*N+1
+  m_root = new BVH_structure[8*targets.size()+1]; // max size is 2*N+1
   //m_bvh_node_size = targets.size()*targets.size()+1;
-  m_bvh_node_size = 4*targets.size()+1;
+  m_bvh_node_size = 8*targets.size()+1;
 
   Construct_internal(type, targets, 0);
 }
@@ -177,30 +180,54 @@ void BVH::Construct_internal(const CONSTRUCTION_TYPE type, const std::vector<Sce
       break;
     case CONSTRUCTION_OBJECT_SAH: 
     {
+      double *leftAreas = new double[axisSortedLeft[axis].size()];
+      double *rightAreas = new double[axisSortedLeft[axis].size()];
+      rightAreas[axisSortedLeft[axis].size()-1] = INF;
+
       BoundingBox boxTmp;
       axisSortedRight[axis].push_back(axisSortedLeft[axis].back());
       axisSortedLeft[axis].pop_back();
+
+      // calculate right area
+      CalcBoundingBoxOfObjects(axisSortedRight[axis], boxTmp);
+      for (int i=axisSortedLeft[axis].size()-1; i>=0; i--) {
+        rightAreas[i] = boxTmp.CalcSurfaceArea();
+        SceneObject *obj = axisSortedLeft[axis][i];
+        boxTmp.MergeAnotherBox(obj->boundingBox);
+
+        axisSortedRight[axis].push_back(axisSortedLeft[axis].back());
+        axisSortedLeft[axis].pop_back();
+      }
+
+      axisSortedLeft[axis].push_back(axisSortedRight[axis].back());
+      axisSortedRight[axis].pop_back();
+      CalcBoundingBoxOfObjects(axisSortedLeft[axis], boxTmp);
+      
       const double leafCost = T_tri * targets.size();
-      for (int i=axisSortedLeft[axis].size()-1; i>=1; i--) {
+      for (int i=axisSortedRight[axis].size()-1, cutIndex=0; i>=0; i--, cutIndex++) {
         // calculate both surface area
-        double leftArea, rightArea;
-        CalcBoundingBoxOfObjects(axisSortedLeft[axis], boxTmp); leftArea = boxTmp.CalcSurfaceArea();
-        CalcBoundingBoxOfObjects(axisSortedRight[axis], boxTmp); rightArea = boxTmp.CalcSurfaceArea();
+        leftAreas[cutIndex] = boxTmp.CalcSurfaceArea();
+        SceneObject *nextObj = axisSortedRight[axis].back();
+        boxTmp.MergeAnotherBox(nextObj->boundingBox);
+
+        // move right to left
+        axisSortedLeft[axis].push_back(axisSortedRight[axis].back());
+        axisSortedRight[axis].pop_back();
 
         // calc SAH
-        double cost = 2*T_aabb + (leftArea*axisSortedLeft[axis].size() + rightArea*axisSortedRight[axis].size())*currentBoxSurfaceInverse * T_tri;
+        double cost = 2*T_aabb + (leftAreas[cutIndex]*axisSortedLeft[axis].size() + rightAreas[cutIndex]*axisSortedRight[axis].size())*currentBoxSurfaceInverse * T_tri;
 
         if ((cost < bestCost || bestCost == -1) && cost < leafCost) {
           bestCost = cost;
-          bestIndex = i;
+          bestIndex = cutIndex;
           bestAxis = axis;
         } else {
           int a = 10;
         }
 
-        axisSortedRight[axis].push_back(axisSortedLeft[axis].back());
-        axisSortedLeft[axis].pop_back();
       }
+      delete [] leftAreas;
+      delete [] rightAreas;
     }
       break;
     }

@@ -70,6 +70,16 @@ public:
         Vector3(std::max(b1.max().x, b2.max().x), std::max(b1.max().y, b2.max().y), std::max(b1.max().z, b2.max().z)));
   }
 
+  void MergeAnotherBox(const BoundingBox &b2) {
+    min_.x = std::min(min_.x, b2.min_.x);
+    min_.y = std::min(min_.y, b2.min_.y);
+    min_.z = std::min(min_.z, b2.min_.z);
+    max_.x = std::max(max_.x, b2.max_.x);
+    max_.y = std::max(max_.y, b2.max_.y);
+    max_.z = std::max(max_.z, b2.max_.z);
+    centerPos_ = (min_+max_)/2;
+  }
+
   const Vector3 &min() const {return min_;}
   const Vector3 &max() const {return max_;}
   const Vector3 &position() const {return centerPos_;}

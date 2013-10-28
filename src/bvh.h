@@ -14,7 +14,7 @@ public:
   };
 
 public:
-  explicit BVH() : m_root(NULL) {}
+  explicit BVH() : m_root(NULL), m_bvh_node_size(0) {}
   ~BVH();
 
   void Construct(const CONSTRUCTION_TYPE type, const std::vector<SceneObject *> &targets);
@@ -27,4 +27,5 @@ private:
 private:
   class BVH_structure;
   BVH_structure *m_root;
+  int m_bvh_node_size;
 };

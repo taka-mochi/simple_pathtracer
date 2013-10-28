@@ -25,12 +25,13 @@ bool BVH::CheckIntersection(const Ray &ray, Scene::IntersectionInformation &info
   info.hit.distance = INF;
   info.object = NULL;
 
-  std::stack<BVH_structure *> next_list;
-  next_list.push(m_root);
+  std::vector<BVH_structure *> next_list;
+  next_list.reserve(m_bvh_node_size);
+  next_list.push_back(m_root);
 
   while (!next_list.empty()) {
-    BVH_structure *next = next_list.top();
-    next_list.pop();
+    BVH_structure *next = next_list.back();
+    next_list.pop_back();
 
     if (next->children[0] == -1) {
       // leaf
@@ -61,17 +62,17 @@ bool BVH::CheckIntersection(const Ray &ray, Scene::IntersectionInformation &info
       if (hit1 && hit2) {
         if (dist1 < dist2) {
           // check child1 at first
-          next_list.push(&m_root[next->children[1]]);
-          next_list.push(&m_root[next->children[0]]);
+          next_list.push_back(&m_root[next->children[1]]);
+          next_list.push_back(&m_root[next->children[0]]);
         } else {
           // check child2 at first
-          next_list.push(&m_root[next->children[0]]);
-          next_list.push(&m_root[next->children[1]]);
+          next_list.push_back(&m_root[next->children[0]]);
+          next_list.push_back(&m_root[next->children[1]]);
         }
       } else if (hit1) {
-        next_list.push(&m_root[next->children[0]]);
+        next_list.push_back(&m_root[next->children[0]]);
       } else if (hit2) {
-        next_list.push(&m_root[next->children[1]]);
+        next_list.push_back(&m_root[next->children[1]]);
       }
     }
   }
@@ -86,6 +87,7 @@ void BVH::Construct(const BVH::CONSTRUCTION_TYPE type, const std::vector<SceneOb
   }
 
   m_root = new BVH_structure[targets.size()*2+1]; // max size is 2*N+1
+  m_bvh_node_size = targets.size()*2+1;
 
   Construct_internal(type, targets, 0);
 }

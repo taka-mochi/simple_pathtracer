@@ -36,8 +36,9 @@ public:
     for (int i=0; i<3; i++) {
       double t_min = INF, t_max = -INF;
       if (fabs(ray_dir_array[i]) >= EPS) {
-        double t1 = (min_array[i] - ray_start_array[i])/ray_dir_array[i];
-        double t2 = (max_array[i] - ray_start_array[i])/ray_dir_array[i];
+        double inv = 1.0/ray_dir_array[i];
+        double t1 = (min_array[i] - ray_start_array[i])*inv;
+        double t2 = (max_array[i] - ray_start_array[i])*inv;
         t_min = std::min(t1, t2);
         t_max = std::max(t1, t2);
       } else {

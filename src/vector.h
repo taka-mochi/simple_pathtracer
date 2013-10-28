@@ -87,4 +87,14 @@ public:
     ss << x << "," << y << "," << z;
     return ss.str();
   }
+
+  static const Vector3 &Zero() {
+    static Vector3 zero;
+    return zero;
+  };
+
+  static const Vector3 &One() {
+    static Vector3 one(1,1,1);
+    return one;
+  }
 };

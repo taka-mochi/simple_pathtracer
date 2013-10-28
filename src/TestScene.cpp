@@ -28,7 +28,7 @@ TestScene::TestScene()
     getchar();
     exit(-1);
   }
-  cube->setTransform(Vector3(50,10,80), Matrix::rotateAroundVector(Vector3(0,1,0), 30.0/180*PI));
+  cube->setTransform(Vector3(50,10,80), Vector3(1.5,1.5,1.5), Matrix::rotateAroundVector(Vector3(0,1,0), 30.0/180*PI));
   addModel(cube);
   
   //addObject(new Sphere(10,Vector3(),           Material(Material::REFLECTION_TYPE_LAMBERT,    Color(), Color(0.25, 0.75, 0.25))));    // —Î‹…

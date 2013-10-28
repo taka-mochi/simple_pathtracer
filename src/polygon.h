@@ -36,10 +36,13 @@ public:
     return v;
   }
 
-  void setTransform(const Vector3 &pos, const Matrix &rot) {
+  void setTransform(const Vector3 &pos, const Vector3 &scale = Vector3::One(), const Matrix &rot = Matrix::Identity()) {
     position = pos;
     for (int i=0; i<3; i++) {
       m_rotatedPos[i] = rot.apply(m_pos[i]);
+      m_rotatedPos[i].x *= scale.x;
+      m_rotatedPos[i].y *= scale.y;
+      m_rotatedPos[i].z *= scale.z;
     }
     reconstruct_boundingbox();
   }

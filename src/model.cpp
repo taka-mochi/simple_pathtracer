@@ -32,14 +32,14 @@ void Model::clear()
   m_meshes.clear();
 }
 
-void Model::setTransform(const Vector3 &pos, const Matrix &rot) {
+void Model::setTransform(const Vector3 &pos, const Vector3 &scale, const Matrix &rot) {
   m_position = pos;
 
   std::vector<Material>::iterator it, end = m_materials.end();
   for (it = m_materials.begin(); it!=end; it++) {
     PolygonList l = getPolygonList(*it);
     for (size_t i=0; i<l.size(); i++) {
-      l[i]->setTransform(pos, rot);
+      l[i]->setTransform(pos, scale, rot);
     }
   }
 }

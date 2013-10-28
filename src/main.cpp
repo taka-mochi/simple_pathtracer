@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
 	int width = 320, height = 240;
 	//PathTracer renderer(width, height, 16, 4);
   SavePPM_callback callback(width, height);
-  PathTracer renderer(width, height, 4, 4, supersampling, &callback);
+  PathTracer renderer(width, height, 4, 32, supersampling, &callback);
 	TestScene scene;
 
 	cerr << "begin rendering..." << endl;

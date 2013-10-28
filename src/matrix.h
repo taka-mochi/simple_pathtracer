@@ -9,6 +9,9 @@ public:
   {
     memset(m, 0, sizeof(m));
   }
+  explicit Matrix(const double m_[4][4]) {
+    memcpy(m, m_, sizeof(m));
+  }
 
   static Matrix rotateAroundVector(const Vector3 &vec, double shita) {
     Matrix m;
@@ -34,6 +37,14 @@ public:
 
     return ret;
   }
+
+  static const Matrix &Identity() {
+    const static double m_[4][4] ={
+      {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}
+    };
+    static Matrix i(m_);
+    return i;
+  };
 
 private:
   double m[4][4];

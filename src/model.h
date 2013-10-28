@@ -22,7 +22,7 @@ public:
   const Vector3 &getPosition() const {
     return m_position;
   }
-  void setTransform(const Vector3 &pos, const Matrix &rot);
+  void setTransform(const Vector3 &pos, const Vector3 &scale = Vector3::One(), const Matrix &rot = Matrix::Identity());
   //void setRotation(const Matrix &matrix);
 
   bool readFromObj(const std::string &filename);

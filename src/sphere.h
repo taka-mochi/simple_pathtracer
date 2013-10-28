@@ -13,6 +13,7 @@ public:
     , m_radius(r)
   {
     position = pos;
+    boundingBox.SetBox(pos - Vector3(r,r,r), pos + Vector3(r,r,r));
   }
 
   bool Intersect(const Ray &ray, HitInformation &hit) const

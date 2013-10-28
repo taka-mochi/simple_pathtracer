@@ -16,6 +16,7 @@ public:
     m_pos[1] = m_rotatedPos[1] = pos2;
     m_pos[2] = m_rotatedPos[2] = pos3;
     position = pos;
+    reconstruct_boundingbox();
   }
   Polygon(const Polygon &polygon)
     : SceneObject(polygon.material)
@@ -25,6 +26,7 @@ public:
       m_rotatedPos[i] = polygon.m_rotatedPos[i];
     }
     m_normal = polygon.m_normal;
+    reconstruct_boundingbox();
   }
   virtual ~Polygon() {}
 
@@ -38,6 +40,7 @@ public:
     for (int i=0; i<3; i++) {
       m_rotatedPos[i] = matrix.apply(m_pos[i]);
     }
+    reconstruct_boundingbox();
   }
 
   bool Intersect(const Ray &ray, HitInformation &hit) const {
@@ -79,6 +82,21 @@ public:
 
   Vector3 m_pos[3];
   Vector3 m_normal;
+
+private:
+  void reconstruct_boundingbox() {
+    boundingBox.SetBox( Vector3(
+      std::min(std::min(m_rotatedPos[0].x, m_rotatedPos[1].x), m_rotatedPos[2].x),
+      std::min(std::min(m_rotatedPos[0].y, m_rotatedPos[1].y), m_rotatedPos[2].y),
+      std::min(std::min(m_rotatedPos[0].z, m_rotatedPos[1].z), m_rotatedPos[2].z)
+      ) + position, 
+      Vector3(
+        std::max(std::max(m_rotatedPos[0].x, m_rotatedPos[1].x), m_rotatedPos[2].x),
+        std::max(std::max(m_rotatedPos[0].y, m_rotatedPos[1].y), m_rotatedPos[2].y),
+        std::max(std::max(m_rotatedPos[0].z, m_rotatedPos[1].z), m_rotatedPos[2].z)
+      ) + position
+    );
+  }
 
 private:
   Vector3 m_rotatedPos[3];

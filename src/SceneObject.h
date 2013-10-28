@@ -2,6 +2,7 @@
 
 #include "color.h"
 #include "material.h"
+#include "bounding_box.h"
 
 class Ray;
 class HitInformation;
@@ -19,5 +20,5 @@ public:
 
   Material material;
   Vector3 position;
-
+  BoundingBox boundingBox;
 };

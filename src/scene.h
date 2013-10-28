@@ -7,6 +7,7 @@
 #include "constant.h"
 
 class SceneObject;
+class BVH;
 
 class Scene {
 public:
@@ -16,65 +17,47 @@ public:
   };
 
 public:
-  ~Scene() {
-    for (size_t i=0; i<m_objects.size(); i++) {
-      SceneObjectInfo &info = m_objects.at(i);
-      if (info.doDelete) {
-        delete info.object;
-      }
-    }
-    for (size_t i=0; i<m_models.size(); i++) {
-      ModelObjectInfo &info = m_models.at(i);
-      if (info.doDelete) {
-        delete info.model;
-      }
-    }
-  }
+  virtual ~Scene();
 
-  bool CheckIntersection(const Ray &ray, IntersectionInformation &info) const {
-    info.hit.distance = INF;
-    info.object = NULL;
+  void ConstructBVH();
 
-    for (size_t i=0; i<m_objects.size(); i++) {
-      SceneObject *obj = m_objects[i].object;
-      HitInformation hit;
-      if (obj->Intersect(ray, hit)) {
-        if (info.hit.distance > hit.distance) {
-          info.hit = hit;
-          info.object = obj;
-        }
-      }
-    }
-    return info.hit.distance != INF;
-  }
+  bool CheckIntersection(const Ray &ray, IntersectionInformation &info) const;
 
 protected:
-  Scene() : m_objects() {}
+  Scene() : m_objects(), m_models(), m_inBVHObjects(), m_bvh(NULL) {}
 
-  void addObject(SceneObject *obj, bool doDelete = true) {
-    m_objects.push_back(SceneObjectInfo(obj, doDelete));
+  void addObject(SceneObject *obj, bool doDelete = true, bool containedInBVH = true) {
+    m_objects.push_back(SceneObjectInfo(obj, doDelete, containedInBVH));
+    if (containedInBVH) {
+      m_inBVHObjects.push_back(obj);
+    }
   }
 
-  void addModel(Model *obj, bool doDelete = true) {
+  void addModel(Model *obj, bool doDelete = true, bool containedInBVH = true) {
     m_models.push_back(ModelObjectInfo(obj, doDelete));
 
     for (size_t i=0; i<obj->getMaterialCount(); i++) {
       const Material &mat = obj->getMaterial(i);
       const Model::PolygonList &pl = obj->getPolygonList(mat);
       for (size_t j=0; j<pl.size(); j++) {
-        addObject(pl[j], false);
+        addObject(pl[j], false, containedInBVH);
+        if (containedInBVH) {
+          m_inBVHObjects.push_back(pl[j]);
+        }
       }
     }
   }
 
   struct SceneObjectInfo {
-    SceneObjectInfo(SceneObject *obj, bool doDelete_)
+    SceneObjectInfo(SceneObject *obj, bool doDelete_, bool inBVH_)
       : object(obj)
       , doDelete(doDelete_)
+      , inBVH(inBVH_)
     {
     }
     SceneObject *object;
     bool doDelete;
+    bool inBVH;
   };
   struct ModelObjectInfo {
     ModelObjectInfo(Model *model_, bool doDelete_)
@@ -86,10 +69,14 @@ protected:
     bool doDelete;
   };
 
+  std::vector<SceneObject *> m_inBVHObjects;
   std::vector<SceneObjectInfo> m_objects;
   std::vector<ModelObjectInfo> m_models;
 
 private:
   Scene(const Scene &s) {}
   Scene &operator =(const Scene &s) {return *this;}
+
+protected:
+  BVH *m_bvh;
 };

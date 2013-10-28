@@ -16,6 +16,10 @@ public:
   double CalcVolume() const {
     return (max_.x-min_.x)*(max_.y-min_.y)*(max_.z-min_.z);
   }
+  double CalcSurfaceArea() const {
+    double diff_x = max_.x-min_.x, diff_y = max_.y-min_.y, diff_z = max_.z-min_.z;
+    return diff_x*diff_y + diff_x*diff_z + diff_y*diff_z;
+  }
 
   void SetBox(const Vector3 &min_, const Vector3 &max_)
   {

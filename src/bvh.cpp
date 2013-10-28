@@ -86,34 +86,20 @@ void BVH::Construct(const BVH::CONSTRUCTION_TYPE type, const std::vector<SceneOb
     delete [] m_root;
   }
 
-  m_root = new BVH_structure[targets.size()*2+1]; // max size is 2*N+1
-  m_bvh_node_size = targets.size()*2+1;
+  //m_root = new BVH_structure[targets.size()*targets.size()+1]; // max size is 2*N+1
+  m_root = new BVH_structure[4*targets.size()+1]; // max size is 2*N+1
+  //m_bvh_node_size = targets.size()*targets.size()+1;
+  m_bvh_node_size = 4*targets.size()+1;
 
   Construct_internal(type, targets, 0);
 }
 
-void BVH::MakeLeaf_internal(const std::vector<SceneObject *> &targets, int index)
+namespace {
+void CalcBoundingBoxOfObjects(const std::vector<SceneObject *> &objects, BoundingBox &boxResult)
 {
-  BVH_structure *st = &m_root[index];
-  st->children[0] = st->children[1] = -1;
-  st->objects = targets;
-  if (targets.size() == 1) st->box = targets[0]->boundingBox;
-  else st->box = BoundingBox::CompoundBoxes(targets[0]->boundingBox, targets[1]->boundingBox);
-}
-
-
-void BVH::Construct_internal(const CONSTRUCTION_TYPE type, const std::vector<SceneObject *> &targets, int index)
-{
-  if (targets.size() <= 2) {
-    // make leaf
-    MakeLeaf_internal(targets, index);
-    return;
-  }
-
-  // calculate this node's bounding box
-  Vector3 box_min(targets[0]->boundingBox.min());
-  Vector3 box_max(targets[0]->boundingBox.max());
-  std::for_each(targets.begin(), targets.end(),
+  Vector3 box_min(objects[0]->boundingBox.min());
+  Vector3 box_max(objects[0]->boundingBox.max());
+  std::for_each(objects.begin(), objects.end(),
     [&box_min, &box_max](const SceneObject * const &a) {
       if (a->boundingBox.min().x < box_min.x) box_min.x = a->boundingBox.min().x;
       if (a->boundingBox.min().y < box_min.y) box_min.y = a->boundingBox.min().y;
@@ -122,7 +108,30 @@ void BVH::Construct_internal(const CONSTRUCTION_TYPE type, const std::vector<Sce
       if (a->boundingBox.max().y > box_max.y) box_max.y = a->boundingBox.max().y;
       if (a->boundingBox.max().z > box_max.z) box_max.z = a->boundingBox.max().z;
   });
-  m_root[index].box = BoundingBox(box_min, box_max);
+  boxResult.SetBox(box_min, box_max);
+}
+}
+
+void BVH::MakeLeaf_internal(const std::vector<SceneObject *> &targets, int index)
+{
+  BVH_structure *st = &m_root[index];
+  st->children[0] = st->children[1] = -1;
+  st->objects = targets;
+  CalcBoundingBoxOfObjects(targets, st->box);
+}
+
+
+void BVH::Construct_internal(const CONSTRUCTION_TYPE type, const std::vector<SceneObject *> &targets, int index)
+{
+  assert (index < m_bvh_node_size);
+
+  const double T_aabb = 1.0; // cost of check intersection of AABB
+  const double T_tri = 1.0; // cost of check intersection of Triangle
+
+  // calculate this node's bounding box
+  CalcBoundingBoxOfObjects(targets, m_root[index].box);
+  double currentBoxSurface = m_root[index].box.CalcSurfaceArea();
+  double currentBoxSurfaceInverse = 1.0/currentBoxSurface;
 
   std::vector<SceneObject *> axisSortedLeft[3], axisSortedRight[3];
 
@@ -148,7 +157,8 @@ void BVH::Construct_internal(const CONSTRUCTION_TYPE type, const std::vector<Sce
     });
 
     switch (type) {
-    case OBJECT_MEDIAN:
+    case CONSTRUCTION_OBJECT_MEDIAN:
+      if (targets.size() > 2)
       {
         // select the media of the objects
         int select = axisSortedLeft[axis].size()/2-1;
@@ -165,14 +175,43 @@ void BVH::Construct_internal(const CONSTRUCTION_TYPE type, const std::vector<Sce
         }
       }
       break;
-    //case OBJECT_VOLUME:
-    //for (int i=axisSortedLeft[axis].size()-1; i>=0; i--) {
+    case CONSTRUCTION_OBJECT_SAH: 
+    {
+      BoundingBox boxTmp;
+      axisSortedRight[axis].push_back(axisSortedLeft[axis].back());
+      axisSortedLeft[axis].pop_back();
+      const double leafCost = T_tri * targets.size();
+      for (int i=axisSortedLeft[axis].size()-1; i>=1; i--) {
+        // calculate both surface area
+        double leftArea, rightArea;
+        CalcBoundingBoxOfObjects(axisSortedLeft[axis], boxTmp); leftArea = boxTmp.CalcSurfaceArea();
+        CalcBoundingBoxOfObjects(axisSortedRight[axis], boxTmp); rightArea = boxTmp.CalcSurfaceArea();
 
+        // calc SAH
+        double cost = 2*T_aabb + (leftArea*axisSortedLeft[axis].size() + rightArea*axisSortedRight[axis].size())*currentBoxSurfaceInverse * T_tri;
 
-    //}
-      //break;
+        if ((cost < bestCost || bestCost == -1) && cost < leafCost) {
+          bestCost = cost;
+          bestIndex = i;
+          bestAxis = axis;
+        } else {
+          int a = 10;
+        }
+
+        axisSortedRight[axis].push_back(axisSortedLeft[axis].back());
+        axisSortedLeft[axis].pop_back();
+      }
+    }
+      break;
     }
   }
+
+  if (bestAxis == -1) {
+    // make leaf
+    MakeLeaf_internal(targets, index);
+    return;
+  }
+
 
   std::vector<SceneObject *> lefts = targets;
   std::sort(lefts.begin(), lefts.end(),

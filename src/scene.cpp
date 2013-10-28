@@ -22,7 +22,8 @@ void Scene::ConstructBVH()
   if (m_bvh) delete m_bvh;
 
   m_bvh = new BVH();
-  m_bvh->Construct(BVH::OBJECT_MEDIAN, m_inBVHObjects);
+  m_bvh->Construct(BVH::CONSTRUCTION_OBJECT_SAH, m_inBVHObjects);
+  //m_bvh->Construct(BVH::CONSTRUCTION_OBJECT_MEDIAN, m_inBVHObjects);
 }
 
 bool Scene::CheckIntersection(const Ray &ray, IntersectionInformation &info) const {

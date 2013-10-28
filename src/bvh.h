@@ -8,9 +8,8 @@
 class BVH {
 public:
   enum CONSTRUCTION_TYPE {
-    OBJECT_MEDIAN,
-    //OBJECT_SURFACE,
-    //OBJECT_VOLUME,
+    CONSTRUCTION_OBJECT_MEDIAN,
+    CONSTRUCTION_OBJECT_SAH,
   };
 
 public:

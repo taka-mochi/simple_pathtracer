@@ -6,7 +6,6 @@
 #include "SceneObject.h"
 #include "material.h"
 #include "polygon.h"
-#include "quad.h"
 
 class Matrix;
 

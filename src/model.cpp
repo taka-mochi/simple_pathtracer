@@ -2,7 +2,6 @@
 #include <fstream>
 #include "model.h"
 #include "polygon.h"
-#include "quad.h"
 #include "utils.h"
 #include "matrix.h"
 

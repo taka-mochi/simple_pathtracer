@@ -3,8 +3,6 @@
 #include "cornell_box_scene.h"
 #include "sphere.h"
 #include "polygon.h"
-#include "quad.h"
-#include "box.h"
 
 CornellBoxScene::CornellBoxScene()
 {

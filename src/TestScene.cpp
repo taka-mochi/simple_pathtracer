@@ -3,8 +3,6 @@
 #include "test_scene.h"
 #include "sphere.h"
 #include "polygon.h"
-#include "quad.h"
-#include "box.h"
 #include "model.h"
 #include "bvh.h"
 

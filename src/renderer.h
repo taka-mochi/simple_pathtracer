@@ -50,6 +50,8 @@ private:
 	Vector3 m_camUp;
 	double m_nearScreenHeight;
 	double m_distToScreen;
+
+  int m_checkIntersectionCount;
 	
 	Color *m_result;
 };

@@ -32,6 +32,7 @@ void PathTracer::init(int screen_width, int screen_height, int min_samples, int 
 	m_distToScreen = (40.0);
   m_renderFinishCallback = callback;
 
+  m_checkIntersectionCount = 0;
   m_camDir.normalize();
 	m_result = new Color[m_width*m_height];
 }
@@ -59,11 +60,14 @@ void PathTracer::RenderScene(const Scene &scene) {
   for (int samples=m_min_samples; samples<=m_max_samples; samples++) {
     clock_t t1, t2;
     t1 = clock();
+    m_checkIntersectionCount = 0;
     ScanPixelsAndCastRays(scene, screen_x, screen_y, screen_center, previous_samples, samples);
     t2 = clock();
     previous_samples = samples;
     cerr << "samples = " << samples << " rendering finished." << endl;
-    cerr << "rendering time = " << (1.0/60)*(t2-t1)/CLOCKS_PER_SEC << " min." << endl;
+    double pastsec = 1.0*(t2-t1)/CLOCKS_PER_SEC;
+    cerr << "rendering time = " << (1.0/60)*pastsec << " min." << endl;
+    cerr << "speed = " << m_checkIntersectionCount/pastsec << " rays (intersection check)/sec" << endl;
     if (m_renderFinishCallback) {
       (*m_renderFinishCallback)(samples, m_result);
     }
@@ -74,7 +78,7 @@ void PathTracer::ScanPixelsAndCastRays(const Scene &scene, const Vector3 &screen
   // trace all pixels
   int processed_y_counts = 0;
   const double averaging_factor = next_samples * m_supersamples * m_supersamples;
-#pragma omp parallel for
+#pragma omp parallel for num_threads(2)
   for (int y=0; y<m_height; y++) {
     Random rnd(y+1+previous_samples*m_height);
     for (int x=0; x<m_width; x++) {
@@ -114,6 +118,7 @@ const static int MaxDepth = 64;
 Color PathTracer::Radiance(const Scene &scene, const Ray &ray, Random &rnd, const int depth) {
   Scene::IntersectionInformation intersect;
 
+  m_checkIntersectionCount++;
   if (!scene.CheckIntersection(ray, intersect)) {
     //std::cerr << "Hit to " << intersect.object << " distance = " << intersect.hit.distance << std::endl;
     return Vector3(0,0,0);

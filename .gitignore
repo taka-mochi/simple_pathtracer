@@ -11,3 +11,6 @@
 /result.ppm
 *.ppm
 Release/
+/Release_Profile
+/bun_zipper.obj
+/bun_zipper.mtl

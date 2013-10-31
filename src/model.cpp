@@ -201,18 +201,19 @@ bool Model::loadMaterialFile(const std::string &filename, std::unordered_map<str
       // type
       // 0: no diffuse
       // 1: diffuse & ambient (but ambient is ignored)
-      // 2: specular (original setting: full lighting)
+      // 2: diffuse (but original setting: full lighting)
       // 3: refractance REFRACTANCE ratio
       vector<string> values(Utils::split(line.substr(string("illum ").length()), ' '));
       string value = values[0];
       switch (atoi(value.c_str())) {
       case 0:
       case 1:
+      case 2:
         currentMaterial.reflection_type = Material::REFLECTION_TYPE_LAMBERT;
         break;
-      case 2:
-        currentMaterial.reflection_type = Material::REFLECTION_TYPE_SPECULAR;
-        break;
+      //case 2:
+      //  currentMaterial.reflection_type = Material::REFLECTION_TYPE_SPECULAR;
+      //  break;
       case 3:
         assert (values.size() == 2);
         currentMaterial.reflection_type = Material::REFLECTION_TYPE_REFRACTION;

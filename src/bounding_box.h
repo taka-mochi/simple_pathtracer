@@ -21,32 +21,44 @@ public:
     return diff_x*diff_y + diff_x*diff_z + diff_y*diff_z;
   }
 
+  template <typename FLOATING> static FLOATING CalcSurfaceArea(FLOATING min[3], FLOATING max[3]) {
+    FLOATING diff[3] = {max[0]-min[0], max[1]-min[1], max[2]-min[2]};
+    return diff[0]*diff[1] + diff[1]*diff[2] + diff[0]*diff[2];
+  }
+
   void SetBox(const Vector3 &min_, const Vector3 &max_)
   {
     this->min_ = min_; this->max_ = max_;
     centerPos_ = (min_+max_)/2.0;
   }
 
-  bool Intersect(const Ray &ray, double &distance) const {
+  inline bool Intersect(const Ray &ray, double &distance) const {
     Vector3 t_min(INF, INF, INF), t_max(-INF, -INF, -INF);
     double fastest_out_t = INF;
     double latest_in_t = -INF;
 
-    double min_array[4] = {min_.x, min_.y, min_.z, 1.0};
-    double max_array[4] = {max_.x, max_.y, max_.z, 1.0};
-    double ray_dir_array[4] = {ray.dir.x, ray.dir.y, ray.dir.z, 1.0};
-    double ray_start_array[4] = {ray.begin.x, ray.begin.y, ray.begin.z, 1.0};
+    double min_array[3] = {min_.x, min_.y, min_.z};
+    double max_array[3] = {max_.x, max_.y, max_.z};
+    double ray_dir_array[3] = {ray.dir.x, ray.dir.y, ray.dir.z};
+    double ray_start_array[3] = {ray.begin.x, ray.begin.y, ray.begin.z};
+
+    return CheckIntersection(ray_dir_array, ray_start_array, min_array, max_array, distance);
+  }
+
+  template <typename FLOATING> static bool CheckIntersection(FLOATING rayDir[3], FLOATING rayOrig[3], FLOATING minbox[3], FLOATING maxbox[3], FLOATING &distance) {
+    FLOATING fastest_out_t = INF;
+    FLOATING latest_in_t = -INF;
 
     for (int i=0; i<3; i++) {
-      double t_min = INF, t_max = -INF;
-      if (fabs(ray_dir_array[i]) >= EPS) {
-        double inv = 1.0/ray_dir_array[i];
-        double t1 = (min_array[i] - ray_start_array[i])*inv;
-        double t2 = (max_array[i] - ray_start_array[i])*inv;
+      FLOATING t_min = INF, t_max = -INF;
+      if (fabs(rayDir[i]) >= EPS) {
+        FLOATING inv = 1.0/rayDir[i];
+        FLOATING t1 = (minbox[i] - rayOrig[i])*inv;
+        FLOATING t2 = (maxbox[i] - rayOrig[i])*inv;
         t_min = std::min(t1, t2);
         t_max = std::max(t1, t2);
       } else {
-        if (ray_start_array[i] > min_array[i] && ray_start_array[i] < max_array[i]) {
+        if (rayOrig[i] > minbox[i] && rayOrig[i] < maxbox[i]) {
           t_min = EPS; t_max = EPS*2;
         } else {
           return false;
@@ -63,6 +75,7 @@ public:
       distance = 0;
 
     return true;
+
   }
 
   static BoundingBox CompoundBoxes(const BoundingBox &b1, const BoundingBox &b2) {

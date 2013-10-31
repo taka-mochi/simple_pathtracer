@@ -6,15 +6,21 @@
 
 using namespace std;
 
-//#pragma pack(push,4)
+namespace {
+  static const int MAX_LEAF_COUNT_IN_ONE_BVH_NODE = 23;
+};
+
 class BVH::BVH_structure {
 public:
-  BoundingBox box;
-  int children[2];
+  //BoundingBox box;
+  float box[2][3];
+  unsigned int children[2];
   //BVH_structure *children[2];
-  std::vector<SceneObject *> objects;
+  //std::vector<SceneObject *> objects;
+  SceneObject *objects[MAX_LEAF_COUNT_IN_ONE_BVH_NODE+1];
+
+  BVH_structure() {objects[0] = NULL;}
 };
-//#pragma pack(pop)
 
 BVH::~BVH()
 {
@@ -29,6 +35,9 @@ bool BVH::CheckIntersection(const Ray &ray, Scene::IntersectionInformation &info
   next_list.reserve(m_bvh_node_size);
   next_list.push_back(m_root);
 
+  float rayDir[3] = {ray.dir.x, ray.dir.y, ray.dir.z};
+  float rayOrig[3] = {ray.begin.x, ray.begin.y, ray.begin.z};
+
   while (!next_list.empty()) {
     BVH_structure *next = next_list.back();
     next_list.pop_back();
@@ -37,7 +46,7 @@ bool BVH::CheckIntersection(const Ray &ray, Scene::IntersectionInformation &info
       // leaf
       HitInformation hit;
       bool isHit = false;
-      for (size_t i=0; i<next->objects.size(); i++) {
+      for (size_t i=0; next->objects[i]; i++) {
         if (next->objects[i]->Intersect(ray, hit)) {
           if (info.hit.distance > hit.distance) {
             isHit = true;
@@ -52,12 +61,13 @@ bool BVH::CheckIntersection(const Ray &ray, Scene::IntersectionInformation &info
     } else {
       // internal node
       // check intersection with children
-      double dist1 = INF, dist2 = INF;
+      float dist1 = INF, dist2 = INF;
       BVH_structure *next1 = &m_root[next->children[0]];
-      bool hit1 = next1->box.Intersect(ray, dist1);
+      bool hit1 = BoundingBox::CheckIntersection(rayDir, rayOrig, next1->box[0], next1->box[1], dist1);//next1->box.Intersect(ray, dist1);
       bool hit2 = false;
       if (next->children[1] >= 0) {
-        hit2 = m_root[next->children[1]].box.Intersect(ray, dist2);
+        BVH_structure *next2 = &m_root[next->children[1]];
+        hit2 = BoundingBox::CheckIntersection(rayDir, rayOrig, next2->box[0], next2->box[1], dist1); //m_root[next->children[1]].box.Intersect(ray, dist2);
       }
       if (hit1 && hit2) {
         if (dist1 < dist2) {
@@ -113,14 +123,36 @@ void CalcBoundingBoxOfObjects(const std::vector<SceneObject *> &objects, Boundin
   });
   boxResult.SetBox(box_min, box_max);
 }
+
+template <typename FLOATING> void CalcBoundingBoxOfObjects(const std::vector<SceneObject *> &objects, FLOATING min[3], FLOATING max[3])
+{
+  min[0] = objects[0]->boundingBox.min().x;
+  min[1] = objects[0]->boundingBox.min().y;
+  min[2] = objects[0]->boundingBox.min().z;
+  max[0] = objects[0]->boundingBox.max().x;
+  max[1] = objects[0]->boundingBox.max().y;
+  max[2] = objects[0]->boundingBox.max().z;
+  std::for_each(objects.begin(), objects.end(),
+    [&min, &max](const SceneObject * const &a) {
+      if (a->boundingBox.min().x < min[0]) min[0] = a->boundingBox.min().x;
+      if (a->boundingBox.min().y < min[1]) min[1] = a->boundingBox.min().y;
+      if (a->boundingBox.min().z < min[2]) min[2] = a->boundingBox.min().z;
+      if (a->boundingBox.max().x > max[0]) max[0] = a->boundingBox.max().x;
+      if (a->boundingBox.max().y > max[1]) max[1] = a->boundingBox.max().y;
+      if (a->boundingBox.max().z > max[2]) max[2] = a->boundingBox.max().z;
+  });
+
+}
 }
 
 void BVH::MakeLeaf_internal(const std::vector<SceneObject *> &targets, int index)
 {
   BVH_structure *st = &m_root[index];
   st->children[0] = st->children[1] = -1;
-  st->objects = targets;
-  CalcBoundingBoxOfObjects(targets, st->box);
+  for (size_t i=0; i<targets.size(); i++)
+    st->objects[i] = targets[i];
+  st->objects[targets.size()] = NULL;
+  CalcBoundingBoxOfObjects(targets, st->box[0], st->box[1]);
 }
 
 
@@ -132,8 +164,8 @@ void BVH::Construct_internal(const CONSTRUCTION_TYPE type, const std::vector<Sce
   const double T_tri = 1.0; // cost of check intersection of Triangle
 
   // calculate this node's bounding box
-  CalcBoundingBoxOfObjects(targets, m_root[index].box);
-  double currentBoxSurface = m_root[index].box.CalcSurfaceArea();
+  CalcBoundingBoxOfObjects(targets, m_root[index].box[0], m_root[index].box[1]);
+  double currentBoxSurface = BoundingBox::CalcSurfaceArea(m_root[index].box[0], m_root[index].box[1]);
   double currentBoxSurfaceInverse = 1.0/currentBoxSurface;
 
   std::vector<SceneObject *> axisSortedLeft[3], axisSortedRight[3];

@@ -51,19 +51,11 @@ public:
 
     for (int i=0; i<3; i++) {
       FLOATING t_min = INF, t_max = -INF;
-      if (fabs(rayDir[i]) >= EPS) {
-        FLOATING inv = 1.0/rayDir[i];
-        FLOATING t1 = (minbox[i] - rayOrig[i])*inv;
-        FLOATING t2 = (maxbox[i] - rayOrig[i])*inv;
-        t_min = std::min(t1, t2);
-        t_max = std::max(t1, t2);
-      } else {
-        if (rayOrig[i] > minbox[i] && rayOrig[i] < maxbox[i]) {
-          t_min = -INF; t_max = INF;
-        } else {
-          return false;
-        }
-      }
+      FLOATING inv = rayDir[i] != 0 ? 1.0/rayDir[i] : INF;
+      FLOATING t1 = (minbox[i] - rayOrig[i])*inv;
+      FLOATING t2 = (maxbox[i] - rayOrig[i])*inv;
+      t_min = std::min(t1, t2);
+      t_max = std::max(t1, t2);
       fastest_out_t = std::min(fastest_out_t, t_max);
       latest_in_t = std::max(latest_in_t, t_min);
       if (latest_in_t > fastest_out_t) return false;

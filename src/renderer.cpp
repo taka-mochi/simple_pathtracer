@@ -10,20 +10,21 @@ using namespace std;
 
 PathTracer::PathTracer(int screen_width, int screen_height, int samples, int supersamples)
 {
-  init(screen_width, screen_height, samples, samples, supersamples, NULL);
+  init(screen_width, screen_height, samples, samples, 1, supersamples, NULL);
 }
 
-PathTracer::PathTracer(int screen_width, int screen_height, int min_samples, int max_samples, int supersamples, RenderingFinishCallback *callback)
+PathTracer::PathTracer(int screen_width, int screen_height, int min_samples, int max_samples, int steps, int supersamples, RenderingFinishCallback *callback)
 {
-  init(screen_width, screen_height, min_samples, max_samples, supersamples, callback);
+  init(screen_width, screen_height, min_samples, max_samples, steps, supersamples, callback);
 }
 
-void PathTracer::init(int screen_width, int screen_height, int min_samples, int max_samples, int supersamples, RenderingFinishCallback *callback)
+void PathTracer::init(int screen_width, int screen_height, int min_samples, int max_samples, int steps, int supersamples, RenderingFinishCallback *callback)
 {
   m_width = screen_width;
 	m_height = (screen_height);
 	m_min_samples = (min_samples);
   m_max_samples = max_samples;
+  m_step_samples = steps;
 	m_supersamples = (supersamples);
 	m_camPos = Vector3(50.0, 52.0, 220.0);
 	m_camDir = Vector3(0.0, -0.04, -1.0);
@@ -57,7 +58,7 @@ void PathTracer::RenderScene(const Scene &scene) {
   const Vector3 screen_center = m_camPos + m_camDir * m_distToScreen;
 
   int previous_samples = 0;
-  for (int samples=m_min_samples; samples<=m_max_samples; samples++) {
+  for (int samples=m_min_samples; samples<=m_max_samples; samples+=m_step_samples) {
     clock_t t1, t2;
     t1 = clock();
     m_checkIntersectionCount = 0;
@@ -67,7 +68,7 @@ void PathTracer::RenderScene(const Scene &scene) {
     cerr << "samples = " << samples << " rendering finished." << endl;
     double pastsec = 1.0*(t2-t1)/CLOCKS_PER_SEC;
     cerr << "rendering time = " << (1.0/60)*pastsec << " min." << endl;
-    cerr << "speed = " << m_checkIntersectionCount/pastsec << " rays (intersection check)/sec" << endl;
+    cerr << "speed = " << samples*m_checkIntersectionCount/pastsec << " rays (intersection check)/sec" << endl;
     if (m_renderFinishCallback) {
       (*m_renderFinishCallback)(samples, m_result);
     }
@@ -78,7 +79,7 @@ void PathTracer::ScanPixelsAndCastRays(const Scene &scene, const Vector3 &screen
   // trace all pixels
   int processed_y_counts = 0;
   const double averaging_factor = next_samples * m_supersamples * m_supersamples;
-#pragma omp parallel for num_threads(1)
+#pragma omp parallel for num_threads(8)
   for (int y=0; y<m_height; y++) {
     Random rnd(y+1+previous_samples*m_height);
     for (int x=0; x<m_width; x++) {

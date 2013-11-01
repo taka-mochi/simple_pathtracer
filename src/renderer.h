@@ -15,7 +15,7 @@ public:
   };
 public:
 	PathTracer(int screen_width, int screen_height, int samples, int supersamples);
-  PathTracer(int screen_width, int screen_height, int min_samples, int max_samples, int supersamples, RenderingFinishCallback *callback);
+  PathTracer(int screen_width, int screen_height, int min_samples, int max_samples, int step, int supersamples, RenderingFinishCallback *callback);
 	~PathTracer();
 
 	void SetCamera(const Vector3 &pos, const Vector3 &dir, const Vector3 &up) {
@@ -29,7 +29,7 @@ public:
 	const Color *GetResult() const {return m_result;}
 
 private:
-  void init(int screen_width, int screen_height, int min_samples, int max_samples, int supersamples, RenderingFinishCallback *callback);
+  void init(int screen_width, int screen_height, int min_samples, int max_samples, int step, int supersamples, RenderingFinishCallback *callback);
 
   void ScanPixelsAndCastRays(const Scene &scene, const Vector3 &screen_x, const Vector3 &screen_y, const Vector3 &screen_center, int previous_samples, int next_samples);
   Color Radiance(const Scene &scene, const Ray &ray, Random &rnd, const int depth);
@@ -41,7 +41,7 @@ private:
 private:
 	int m_width;
 	int m_height;
-	int m_min_samples,m_max_samples;
+	int m_min_samples,m_max_samples,m_step_samples;
 	int m_supersamples;
   RenderingFinishCallback *m_renderFinishCallback;
 

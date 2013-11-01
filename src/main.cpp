@@ -13,6 +13,10 @@ using namespace std;
 
 static const int supersampling = 4;
 
+static const int startSample = 14;
+static const int endSample = 1024;
+static const int stepSample = 10;
+
 class SavePPM_callback : public PathTracer::RenderingFinishCallback {
   int w,h;
 public:
@@ -31,10 +35,10 @@ public:
 
 int main(int argc, char *argv[]) {
 
-	int width = 320, height = 240;
+	int width = 640, height = 480;
 	//PathTracer renderer(width, height, 16, 4);
   SavePPM_callback callback(width, height);
-  PathTracer renderer(width, height, 1, 1024, supersampling, &callback);
+  PathTracer renderer(width, height, startSample, endSample, stepSample, supersampling, &callback);
 	TestScene scene;
   //CornellBoxScene scene;
 

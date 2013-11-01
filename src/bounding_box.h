@@ -59,7 +59,7 @@ public:
         t_max = std::max(t1, t2);
       } else {
         if (rayOrig[i] > minbox[i] && rayOrig[i] < maxbox[i]) {
-          t_min = EPS; t_max = EPS*2;
+          t_min = -INF; t_max = INF;
         } else {
           return false;
         }

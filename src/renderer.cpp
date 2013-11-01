@@ -68,16 +68,20 @@ void PathTracer::RenderScene(const Scene &scene) {
     cerr << "samples = " << samples << " rendering finished." << endl;
     double pastsec = 1.0*(t2-t1)/CLOCKS_PER_SEC;
     cerr << "rendering time = " << (1.0/60)*pastsec << " min." << endl;
-    cerr << "speed = " << samples*m_checkIntersectionCount/pastsec << " rays (intersection check)/sec" << endl;
+    cerr << "speed = " << m_checkIntersectionCount/pastsec*(samples-previous_samples) << " rays (intersection check)/sec" << endl;
     if (m_renderFinishCallback) {
       (*m_renderFinishCallback)(samples, m_result);
     }
   }
 }
 
-void PathTracer::ScanPixelsAndCastRays(const Scene &scene, const Vector3 &screen_x, const Vector3 &screen_y, const Vector3 &screen_center, int previous_samples, int next_samples) {
-  // trace all pixels
+namespace {
   int processed_y_counts = 0;
+}
+
+void PathTracer::ScanPixelsAndCastRays(const Scene &scene, const Vector3 &screen_x, const Vector3 &screen_y, const Vector3 &screen_center, int previous_samples, int next_samples) {
+  processed_y_counts = 0;
+  // trace all pixels
   const double averaging_factor = next_samples * m_supersamples * m_supersamples;
 #pragma omp parallel for num_threads(8)
   for (int y=0; y<m_height; y++) {

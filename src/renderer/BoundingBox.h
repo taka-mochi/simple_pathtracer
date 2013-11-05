@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include "tools/Vector.h"
 #include "Ray.h"
 #include "tools/Constant.h"
@@ -70,6 +71,93 @@ public:
 
     return true;
 
+  }
+
+  // Reference: http://d.hatena.ne.jp/ototoi/20090925/p1
+  inline static bool CheckIntersection4floatAABB(
+	  const __m128 bboxes[2][3], // 4boxes: min-max[2] * xyz[3] * boxes[4](__m128)
+	  const __m128 rayOrig[3],   // ray origin
+	  const __m128 rayInverseDir[3], // ray inversed dir
+	  const int raySign[3],         // ray xyz direction => +:0, -:1
+	  __m128 tmin, __m128 tmax,     // ray range tmin-tmax
+	  bool results[4]               // intersection results
+	  ) {
+
+    // tmin = max(tmin, (box[min or max]-rayOrig)/rayDir)
+    // tmax = min(tmax, (box[max or min]-rayOrig)/rayDir)
+    // if tmax > tmin, intersects. Otherwise, no intersections
+
+    // x
+    tmin = _mm_max_ps(
+      tmin, _mm_mul_ps(_mm_sub_ps(bboxes[raySign[0]][0], rayOrig[0]), rayInverseDir[0])
+    );
+    tmax = _mm_min_ps(
+      tmax, _mm_mul_ps(_mm_sub_ps(bboxes[1 - raySign[0]][0], rayOrig[0]), rayInverseDir[0])
+    );
+
+    // y
+    tmin = _mm_max_ps(
+      tmin, _mm_mul_ps(_mm_sub_ps(bboxes[raySign[1]][1], rayOrig[1]), rayInverseDir[1])
+      );
+    tmax = _mm_min_ps(
+      tmax, _mm_mul_ps(_mm_sub_ps(bboxes[1 - raySign[1]][1], rayOrig[1]), rayInverseDir[1])
+      );
+
+    // z
+    tmin = _mm_max_ps(
+      tmin, _mm_mul_ps(_mm_sub_ps(bboxes[raySign[2]][2], rayOrig[2]), rayInverseDir[2])
+      );
+    tmax = _mm_min_ps(
+      tmax, _mm_mul_ps(_mm_sub_ps(bboxes[1 - raySign[2]][2], rayOrig[2]), rayInverseDir[2])
+      );
+
+    int ret = _mm_movemask_ps(_mm_cmpge_ps(tmax, tmin));
+    if (ret == 0) return false;
+    for (int i = 0; i < 4; i++) results[i] = ((ret >> i) & 0x1) != 0;
+    return true;
+  }
+
+  inline static bool CheckIntersection2doubleAABB(
+    const __m128d bboxes[2][3], // 4boxes: min-max[2] * xyz[3] * boxes[2](__m128)
+    const __m128d rayOrig[3],   // ray origin
+    const __m128d rayInverseDir[3], // ray inversed dir
+    const int raySign[3],         // ray xyz direction => +:0, -:1
+    __m128d tmin, __m128d tmax,     // ray range tmin-tmax
+    bool results[2]               // intersection results
+    ) {
+
+    // tmin = max(tmin, (box[min or max]-rayOrig)/rayDir)
+    // tmax = min(tmax, (box[max or min]-rayOrig)/rayDir)
+    // if tmax > tmin, intersects. Otherwise, no intersections
+
+    // x
+    tmin = _mm_max_pd(
+      tmin, _mm_mul_pd(_mm_sub_pd(bboxes[raySign[0]][0], rayOrig[0]), rayInverseDir[0])
+      );
+    tmax = _mm_min_pd(
+      tmax, _mm_mul_pd(_mm_sub_pd(bboxes[1 - raySign[0]][0], rayOrig[0]), rayInverseDir[0])
+      );
+
+    // y
+    tmin = _mm_max_pd(
+      tmin, _mm_mul_pd(_mm_sub_pd(bboxes[raySign[1]][1], rayOrig[1]), rayInverseDir[1])
+      );
+    tmax = _mm_min_pd(
+      tmax, _mm_mul_pd(_mm_sub_pd(bboxes[1 - raySign[1]][1], rayOrig[1]), rayInverseDir[1])
+      );
+
+    // z
+    tmin = _mm_max_pd(
+      tmin, _mm_mul_pd(_mm_sub_pd(bboxes[raySign[2]][2], rayOrig[2]), rayInverseDir[2])
+      );
+    tmax = _mm_min_pd(
+      tmax, _mm_mul_pd(_mm_sub_pd(bboxes[1 - raySign[2]][2], rayOrig[2]), rayInverseDir[2])
+      );
+
+    int ret = _mm_movemask_pd(_mm_cmpge_pd(tmax, tmin));
+    if (ret == 0) return false;
+    for (int i = 0; i < 2; i++) results[i] = ((ret >> i) & 0x1) != 0;
+    return true;
   }
 
   static BoundingBox CompoundBoxes(const BoundingBox &b1, const BoundingBox &b2) {

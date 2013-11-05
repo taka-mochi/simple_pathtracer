@@ -32,16 +32,16 @@ public:
   }
   virtual ~Polygon() {}
 
-  static Vector3 calculateNormal(const Vector3 &anticlockwise_v0, const Vector3 &anticlockwise_v1, const Vector3 &anticlockwise_v2) {
+  static Vector3 CalculateNormal(const Vector3 &anticlockwise_v0, const Vector3 &anticlockwise_v1, const Vector3 &anticlockwise_v2) {
     Vector3 v((anticlockwise_v1-anticlockwise_v0).cross(anticlockwise_v2-anticlockwise_v0));
     v.normalize();
     return v;
   }
 
-  void setTransform(const Vector3 &pos, const Vector3 &scale = Vector3::One(), const Matrix &rot = Matrix::Identity()) {
+  void SetTransform(const Vector3 &pos, const Vector3 &scale = Vector3::One(), const Matrix &rot = Matrix::Identity()) {
     position = pos;
     for (int i=0; i<3; i++) {
-      m_rotatedPos[i] = rot.apply(m_pos[i]);
+      m_rotatedPos[i] = rot.Apply(m_pos[i]);
       m_rotatedPos[i].x *= scale.x;
       m_rotatedPos[i].y *= scale.y;
       m_rotatedPos[i].z *= scale.z;
@@ -49,7 +49,7 @@ public:
     reconstruct_boundingbox();
   }
 
-  bool Intersect(const Ray &ray, HitInformation &hit) const {
+  bool CheckIntersection(const Ray &ray, HitInformation &hit) const {
     // ˜A—§•û’öŽ®‚ð‰ð‚­
     // ŽQl: http://shikousakugo.wordpress.com/2012/07/01/ray-intersection-3/
     Vector3 edge1(m_rotatedPos[1] - m_rotatedPos[0]);

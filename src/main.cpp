@@ -27,7 +27,7 @@ public:
     sprintf(name, "result_sah_bunny_%04d_%dx%d.ppm", samples, supersampling, supersampling);
     clock_t begin,end;
     begin = clock();
-    PPM::save(name, img, w, h);
+    PPM::Save(name, img, w, h);
     end = clock();
     cerr << "saving time = " << (double)(end - begin)/CLOCKS_PER_SEC << endl;
   };

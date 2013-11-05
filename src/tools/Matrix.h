@@ -15,7 +15,7 @@ public:
     memcpy(m, m_, sizeof(m));
   }
 
-  static Matrix rotateAroundVector(const Vector3 &vec, double shita) {
+  static Matrix RotateAroundVector(const Vector3 &vec, double shita) {
     Matrix m;
     double cos_shita = cos(shita);
     double sin_shita = sin(shita);
@@ -30,7 +30,7 @@ public:
     return m;
   }
 
-  Vector3 apply(const Vector3 &vec) const {
+  Vector3 Apply(const Vector3 &vec) const {
     Vector3 ret;
 
     ret.x = m[0][0]*vec.x + m[0][1]*vec.y + m[0][2]*vec.z;

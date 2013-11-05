@@ -34,7 +34,7 @@ public:
     m_centerPos = (m_min+m_max)/2.0;
   }
 
-  inline bool Intersect(const Ray &ray, double &distance) const {
+  inline bool CheckIntersection(const Ray &ray, double &distance) const {
     Vector3 t_min(INF, INF, INF), t_max(-INF, -INF, -INF);
     double fastest_out_t = INF;
     double latest_in_t = -INF;

@@ -49,7 +49,7 @@ bool BVH::CheckIntersection(const Ray &ray, Scene::IntersectionInformation &info
       HitInformation hit;
       bool isHit = false;
       for (size_t i=0; next->objects[i]; i++) {
-        if (next->objects[i]->Intersect(ray, hit)) {
+        if (next->objects[i]->CheckIntersection(ray, hit)) {
           if (info.hit.distance > hit.distance) {
             isHit = true;
             info.hit = hit;

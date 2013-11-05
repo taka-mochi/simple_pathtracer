@@ -18,14 +18,14 @@ Model::Model()
 
 Model::~Model()
 {
-  clear();
+  Clear();
 }
 
-void Model::clear()
+void Model::Clear()
 {
   std::vector<Material>::iterator it, end = m_materials.end();
   for (it = m_materials.begin(); it!=end; it++) {
-    PolygonList l = getPolygonList(*it);
+    PolygonList l = GetPolygonList(*it);
     for (size_t i=0; i<l.size(); i++) {
       delete l[i];
     }
@@ -34,24 +34,24 @@ void Model::clear()
   m_meshes.clear();
 }
 
-void Model::setTransform(const Vector3 &pos, const Vector3 &scale, const Matrix &rot) {
+void Model::SetTransform(const Vector3 &pos, const Vector3 &scale, const Matrix &rot) {
   m_position = pos;
 
   std::vector<Material>::iterator it, end = m_materials.end();
   for (it = m_materials.begin(); it!=end; it++) {
-    PolygonList l = getPolygonList(*it);
+    PolygonList l = GetPolygonList(*it);
     for (size_t i=0; i<l.size(); i++) {
-      l[i]->setTransform(pos, scale, rot);
+      l[i]->SetTransform(pos, scale, rot);
     }
   }
 }
 
-bool Model::readFromObj(const std::string &filename) {
+bool Model::ReadFromObj(const std::string &filename) {
   ifstream ifs(filename.c_str());
 
   if (!ifs) return false;
 
-  clear();
+  Clear();
 
   const static std::string defaultMaterialName = "__default__material__";
 
@@ -81,7 +81,7 @@ bool Model::readFromObj(const std::string &filename) {
       //materialNames[line.substr(string("mtllib ").length())] = Material(Material::REFLECTION_TYPE_LAMBERT, Vector3(0,0,0), Vector3(0.999+index*0.001,0.99,0.99));
       //index++;
       // materialÇÉçÅ[ÉhÇ∑ÇÈ
-      if (!loadMaterialFile(line.substr(string("mtlib ").length()+1), materialNames)) {
+      if (!LoadMaterialFile(line.substr(string("mtlib ").length()+1), materialNames)) {
         cerr << "failed to load material file: " << line.substr(string("mtlib ").length()) << endl;
         return false;
       }
@@ -145,7 +145,7 @@ bool Model::readFromObj(const std::string &filename) {
         currentPolygonList->push_back(polygons[0]);
         currentPolygonList->push_back(polygons[1]);
       } else if (faces.size() == 3) {
-        PolygonPtr polygon(load3verticesFace(faces, verticesInGroup, normalsInGroup, uvCoordinatesInGroup, materialNames[currentMaterialName]));
+        PolygonPtr polygon(Load3verticesFace(faces, verticesInGroup, normalsInGroup, uvCoordinatesInGroup, materialNames[currentMaterialName]));
         currentPolygonList->push_back(polygon);
       }
     }
@@ -160,7 +160,7 @@ bool Model::readFromObj(const std::string &filename) {
   return true;
 }
 
-bool Model::loadMaterialFile(const std::string &filename, std::unordered_map<string, Material> &materials) {
+bool Model::LoadMaterialFile(const std::string &filename, std::unordered_map<string, Material> &materials) {
   ifstream ifs(filename.c_str());
 
   if (!ifs) return false;
@@ -264,8 +264,8 @@ std::vector<Model::PolygonPtr> Model::load4verticesFace(const vector<string> &fa
   vector<string> face1, face2;
   face1.push_back(face[0]); face1.push_back(face[1]); face1.push_back(face[2]);
   face2.push_back(face[0]); face2.push_back(face[2]); face2.push_back(face[3]);
-  PolygonPtr p1 = load3verticesFace(face1, verticesInGroup, normalsInGroup, uvCoordinatesInGroup, mat);
-  PolygonPtr p2 = load3verticesFace(face2, verticesInGroup, normalsInGroup, uvCoordinatesInGroup, mat);
+  PolygonPtr p1 = Load3verticesFace(face1, verticesInGroup, normalsInGroup, uvCoordinatesInGroup, mat);
+  PolygonPtr p2 = Load3verticesFace(face2, verticesInGroup, normalsInGroup, uvCoordinatesInGroup, mat);
 
   vector<PolygonPtr> ret;
   ret.push_back(p1); ret.push_back(p2);
@@ -273,7 +273,7 @@ std::vector<Model::PolygonPtr> Model::load4verticesFace(const vector<string> &fa
   return ret;
 }
 
-Model::PolygonPtr Model::load3verticesFace(const vector<string> &face, const vector<Vector3> &verticesInGroup, 
+Model::PolygonPtr Model::Load3verticesFace(const vector<string> &face, const vector<Vector3> &verticesInGroup, 
   const vector<Vector3> &normalsInGroup, 
   const vector<Vector3> &uvCoordinatesInGroup, const Material &mat) {
   Vector3 vec[3], normals[3];
@@ -312,7 +312,7 @@ Model::PolygonPtr Model::load3verticesFace(const vector<string> &face, const vec
   PolygonPtr ret_p;
   if (averaged_normal.x == 0 && averaged_normal.y == 0 && averaged_normal.z == 0) {
     // normal ÇÃéwíËÇ»Ç©Ç¡ÇΩ
-    ret_p = ( new Polygon(vec[0], vec[1], vec[2], Polygon::calculateNormal(vec[0], vec[1], vec[2]), mat, Vector3(0,0,0)) );
+    ret_p = ( new Polygon(vec[0], vec[1], vec[2], Polygon::CalculateNormal(vec[0], vec[1], vec[2]), mat, Vector3(0,0,0)) );
   } else {
     averaged_normal /= 3.0;
     ret_p = ( new Polygon(vec[0], vec[1], vec[2], averaged_normal*-1, mat, Vector3(0,0,0)) );

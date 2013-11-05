@@ -18,7 +18,7 @@ public:
     boundingBox.SetBox(pos - Vector3(r,r,r), pos + Vector3(r,r,r));
   }
 
-  bool Intersect(const Ray &ray, HitInformation &hit) const
+  bool CheckIntersection(const Ray &ray, HitInformation &hit) const
   {
     // x: the origin of the ray
     // v: normalized direction of the ray

@@ -39,7 +39,7 @@ bool Scene::CheckIntersection(const Ray &ray, IntersectionInformation &info) con
     for (it = m_inBVHObjects.begin(); it!=end; it++) {
       SceneObject *obj = *it;
       HitInformation hit;
-      if (obj->Intersect(ray, hit)) {
+      if (obj->CheckIntersection(ray, hit)) {
         if (info.hit.distance > hit.distance) {
           info.hit = hit;
           info.object = obj;
@@ -52,7 +52,7 @@ bool Scene::CheckIntersection(const Ray &ray, IntersectionInformation &info) con
   for (it = m_notInBVHObjects.begin(); it!=end; it++) {
     SceneObject *obj = *it;
     HitInformation hit;
-    if (obj->Intersect(ray, hit)) {
+    if (obj->CheckIntersection(ray, hit)) {
       if (info.hit.distance > hit.distance) {
         info.hit = hit;
         info.object = obj;

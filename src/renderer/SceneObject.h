@@ -18,7 +18,7 @@ public:
   }
   virtual ~SceneObject() {}
 
-  virtual bool Intersect(const Ray &ray, HitInformation &hit) const = 0;
+  virtual bool CheckIntersection(const Ray &ray, HitInformation &hit) const = 0;
 
   Material material;
   Vector3 position;

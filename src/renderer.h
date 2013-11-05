@@ -1,7 +1,7 @@
 #pragma once
 
-#include "color.h"
-#include "scene.h"
+#include "Color.h"
+#include "Scene.h"
 
 namespace SimpleRenderer {
 

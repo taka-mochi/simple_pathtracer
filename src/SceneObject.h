@@ -1,8 +1,8 @@
 #pragma once
 
-#include "color.h"
-#include "material.h"
-#include "bounding_box.h"
+#include "Color.h"
+#include "Material.h"
+#include "BoundingBox.h"
 
 namespace SimpleRenderer {
 

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "bvh.h"
+#include "BVH.h"
 #include <stack>
 #include <algorithm>
 #include <emmintrin.h>

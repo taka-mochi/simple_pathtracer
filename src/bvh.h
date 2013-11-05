@@ -2,7 +2,7 @@
 #pragma once
 
 #include <vector>
-#include "scene.h"
+#include "Scene.h"
 #include "SceneObject.h"
 
 namespace SimpleRenderer {

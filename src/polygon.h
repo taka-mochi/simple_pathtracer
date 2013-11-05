@@ -1,10 +1,10 @@
 #pragma once
 
 #include "SceneObject.h"
-#include "ray.h"
-#include "constant.h"
-#include "hit.h"
-#include "matrix.h"
+#include "Ray.h"
+#include "Constant.h"
+#include "HitInformation.h"
+#include "Matrix.h"
 
 namespace SimpleRenderer {
 

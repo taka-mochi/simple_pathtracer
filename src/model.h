@@ -4,8 +4,8 @@
 #include <vector>
 #include <unordered_map>
 #include "SceneObject.h"
-#include "material.h"
-#include "polygon.h"
+#include "Material.h"
+#include "Polygon.h"
 
 
 namespace SimpleRenderer {

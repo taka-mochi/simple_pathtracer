@@ -1,10 +1,10 @@
 #pragma once
 
 #include "SceneObject.h"
-#include "color.h"
-#include "ray.h"
-#include "hit.h"
-#include "material.h"
+#include "Color.h"
+#include "Ray.h"
+#include "HitInformation.h"
+#include "Material.h"
 
 namespace SimpleRenderer {
 

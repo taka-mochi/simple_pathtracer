@@ -1,9 +1,9 @@
 #include <iostream>
 #include <fstream>
-#include "model.h"
-#include "polygon.h"
-#include "utils.h"
-#include "matrix.h"
+#include "Model.h"
+#include "Polygon.h"
+#include "Utils.h"
+#include "Matrix.h"
 
 
 using namespace std;

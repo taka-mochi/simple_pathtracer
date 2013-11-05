@@ -1,10 +1,10 @@
 
 #include <iostream>
-#include "test_scene.h"
-#include "sphere.h"
-#include "polygon.h"
-#include "model.h"
-#include "bvh.h"
+#include "TestScene.h"
+#include "Sphere.h"
+#include "Polygon.h"
+#include "Model.h"
+#include "BVH.h"
 
 namespace SimpleRenderer {
 

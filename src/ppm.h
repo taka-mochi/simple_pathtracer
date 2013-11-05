@@ -5,7 +5,7 @@
 #include <fstream>
 #include <cmath>
 #include <sstream>
-#include "color.h"
+#include "Color.h"
 
 namespace SimpleRenderer {
 

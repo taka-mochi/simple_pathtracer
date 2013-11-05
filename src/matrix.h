@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstring>
-#include "vector.h"
+#include "Vector.h"
 
 namespace SimpleRenderer {
 

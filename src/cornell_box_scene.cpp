@@ -4,6 +4,8 @@
 #include "sphere.h"
 #include "polygon.h"
 
+namespace SimpleRenderer {
+
 CornellBoxScene::CornellBoxScene()
 {
   addObject(new Sphere(1e5, Vector3( 1e5+1, 40.8, 81.6),  Material(Material::REFLECTION_TYPE_LAMBERT, Color(), Color(0.75, 0.25, 0.25))), true, false);  // ç∂
@@ -19,4 +21,6 @@ CornellBoxScene::CornellBoxScene()
 	addObject(new Sphere(15.0,Vector3(50.0, 90.0, 81.6),   Material(Material::REFLECTION_TYPE_LAMBERT, Color(36,36,36), Color())));    // è∆ñæ
 
   ConstructBVH();
+}
+
 }

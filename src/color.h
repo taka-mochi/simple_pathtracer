@@ -2,4 +2,6 @@
 
 #include "vector.h"
 
-typedef Vector3 Color;
+namespace SimpleRenderer {
+  typedef Vector3 Color;
+}

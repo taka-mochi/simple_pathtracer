@@ -4,6 +4,8 @@
 #include "material.h"
 #include "bounding_box.h"
 
+namespace SimpleRenderer {
+
 class Ray;
 class HitInformation;
 
@@ -22,3 +24,5 @@ public:
   Vector3 position;
   BoundingBox boundingBox;
 };
+
+}

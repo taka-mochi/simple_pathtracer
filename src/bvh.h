@@ -5,6 +5,8 @@
 #include "scene.h"
 #include "SceneObject.h"
 
+namespace SimpleRenderer {
+
 class BVH {
 public:
   enum CONSTRUCTION_TYPE {
@@ -28,3 +30,5 @@ private:
   BVH_structure *m_root;
   int m_bvh_node_size;
 };
+
+}

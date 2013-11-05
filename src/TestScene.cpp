@@ -6,6 +6,7 @@
 #include "model.h"
 #include "bvh.h"
 
+namespace SimpleRenderer {
 
 TestScene::TestScene()
 {
@@ -39,4 +40,6 @@ TestScene::TestScene()
 	addObject(new Sphere(15.0,Vector3(50.0, 90.0, 81.6),   Material(Material::REFLECTION_TYPE_LAMBERT, Color(36,36,36), Color())), true, false);    // è∆ñæ
 
   ConstructBVH();
+}
+
 }

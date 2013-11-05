@@ -2,6 +2,8 @@
 
 #include <climits>
 
+namespace SimpleRenderer {
+
 class Random {
 public:
   Random(const unsigned int seed) {
@@ -26,3 +28,5 @@ public:
 private:
   unsigned int m_seed[4];
 };
+
+}

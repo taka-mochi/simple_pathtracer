@@ -6,6 +6,8 @@
 #include "hit.h"
 #include "material.h"
 
+namespace SimpleRenderer {
+
 class Sphere : public SceneObject {
 public:
   Sphere(double r, const Vector3 &pos, const Material &material_)
@@ -51,3 +53,5 @@ public:
 private:
   double m_radius;
 };
+
+}

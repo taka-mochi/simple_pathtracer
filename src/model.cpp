@@ -8,6 +8,8 @@
 
 using namespace std;
 
+namespace SimpleRenderer {
+
 Model::Model()
   : m_materials()
   , m_meshes()
@@ -317,4 +319,6 @@ Model::PolygonPtr Model::load3verticesFace(const vector<string> &face, const vec
   }
 
   return ret_p;
+}
+
 }

@@ -3,6 +3,8 @@
 #include "color.h"
 #include "scene.h"
 
+namespace SimpleRenderer {
+
 class Scene;
 class Ray;
 class Random;
@@ -55,3 +57,5 @@ private:
 	
 	Color *m_result;
 };
+
+}

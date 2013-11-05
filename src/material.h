@@ -3,6 +3,8 @@
 #include <functional>
 #include "color.h"
 
+namespace SimpleRenderer {
+
 class Material {
 public:
   enum REFLECTION_TYPE {
@@ -46,3 +48,5 @@ struct MaterialEq {
     return mat1.reflection_type == mat2.reflection_type && mat1.color == mat2.color && mat1.emission == mat2.emission && mat1.refraction_rate == mat2.refraction_rate;
   }
 };
+
+}

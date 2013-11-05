@@ -4,6 +4,8 @@
 #include <cassert>
 #include <sstream>
 
+namespace SimpleRenderer {
+
 class Vector3 {
 public:
 	double x,y,z;
@@ -98,3 +100,5 @@ public:
     return one;
   }
 };
+
+}

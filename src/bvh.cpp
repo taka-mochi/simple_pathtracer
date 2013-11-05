@@ -10,6 +10,8 @@ namespace {
   static const int MAX_LEAF_COUNT_IN_ONE_BVH_NODE = 23;
 };
 
+namespace SimpleRenderer {
+
 class BVH::BVH_structure {
 public:
   //BoundingBox box;
@@ -296,4 +298,6 @@ void BVH::Construct_internal(const CONSTRUCTION_TYPE type, const std::vector<Sce
   // constructs children
   Construct_internal(type, lefts, current->children[0]);
   Construct_internal(type, rights, current->children[1]);
+}
+
 }

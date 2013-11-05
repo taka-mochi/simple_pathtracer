@@ -1,6 +1,8 @@
 #include "scene.h"
 #include "bvh.h"
 
+namespace SimpleRenderer {
+
 Scene::~Scene() {
   for (size_t i=0; i<m_objects.size(); i++) {
     SceneObjectInfo &info = m_objects.at(i);
@@ -22,8 +24,8 @@ void Scene::ConstructBVH()
   if (m_bvh) delete m_bvh;
 
   m_bvh = new BVH();
-  m_bvh->Construct(BVH::CONSTRUCTION_OBJECT_SAH, m_inBVHObjects);
-  //m_bvh->Construct(BVH::CONSTRUCTION_OBJECT_MEDIAN, m_inBVHObjects);
+  //m_bvh->Construct(BVH::CONSTRUCTION_OBJECT_SAH, m_inBVHObjects);
+  m_bvh->Construct(BVH::CONSTRUCTION_OBJECT_MEDIAN, m_inBVHObjects);
 }
 
 bool Scene::CheckIntersection(const Ray &ray, IntersectionInformation &info) const {
@@ -58,4 +60,6 @@ bool Scene::CheckIntersection(const Ray &ray, IntersectionInformation &info) con
     }
   }
   return info.hit.distance != INF;
+}
+
 }

@@ -3,6 +3,8 @@
 #include <cstring>
 #include "vector.h"
 
+namespace SimpleRenderer {
+
 class Matrix {
 public:
   Matrix()
@@ -49,3 +51,5 @@ public:
 private:
   double m[4][4];
 };
+
+}

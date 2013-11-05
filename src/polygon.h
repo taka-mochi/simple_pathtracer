@@ -6,6 +6,8 @@
 #include "hit.h"
 #include "matrix.h"
 
+namespace SimpleRenderer {
+
 class Polygon : public SceneObject {
 public:
   Polygon(const Vector3 &pos1, const Vector3 &pos2, const Vector3 &pos3, const Vector3 &normal, const Material &mat, const Vector3 &pos)
@@ -105,3 +107,5 @@ private:
 private:
   Vector3 m_rotatedPos[3];
 };
+
+}

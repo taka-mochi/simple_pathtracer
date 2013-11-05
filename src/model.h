@@ -7,6 +7,9 @@
 #include "material.h"
 #include "polygon.h"
 
+
+namespace SimpleRenderer {
+
 class Matrix;
 
 class Model {
@@ -57,3 +60,5 @@ private:
 
   Vector3 m_position;
 };
+
+}

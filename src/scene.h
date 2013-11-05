@@ -6,6 +6,8 @@
 #include "model.h"
 #include "constant.h"
 
+namespace SimpleRenderer {
+
 class SceneObject;
 class BVH;
 
@@ -80,3 +82,5 @@ private:
 protected:
   BVH *m_bvh;
 };
+
+}

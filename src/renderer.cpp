@@ -8,6 +8,8 @@
 
 using namespace std;
 
+namespace SimpleRenderer {
+
 PathTracer::PathTracer(int screen_width, int screen_height, int samples, int supersamples)
 {
   init(screen_width, screen_height, samples, samples, 1, supersamples, NULL);
@@ -271,4 +273,6 @@ Color PathTracer::Radiance_Refraction(const Scene &scene, const Ray &ray, Random
   }
 
   return intersect.object->material.emission + Vector3(weight.x*income.x, weight.y*income.y, weight.z*income.z);
+}
+
 }

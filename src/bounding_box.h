@@ -4,6 +4,8 @@
 #include "ray.h"
 #include "constant.h"
 
+namespace SimpleRenderer {
+
 class BoundingBox {
 public:
   BoundingBox(const Vector3 &minPos = Vector3(0,0,0), const Vector3 &maxPos = Vector3(0,0,0))
@@ -94,3 +96,5 @@ private:
   Vector3 max_;
   Vector3 centerPos_;
 };
+
+}

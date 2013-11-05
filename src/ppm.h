@@ -7,6 +7,8 @@
 #include <sstream>
 #include "color.h"
 
+namespace SimpleRenderer {
+
 class PPM {
 private:
 	static double clamp(double x) {
@@ -37,3 +39,5 @@ public:
 		}
 	}
 };
+
+}

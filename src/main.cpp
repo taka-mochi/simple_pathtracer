@@ -10,6 +10,7 @@
 #include "model.h"
 
 using namespace std;
+using namespace SimpleRenderer;
 
 static const int supersampling = 4;
 

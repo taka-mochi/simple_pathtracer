@@ -2,6 +2,8 @@
 
 #include "vector.h"
 
+namespace SimpleRenderer {
+
 class HitInformation {
 public:
   HitInformation()
@@ -15,3 +17,5 @@ public:
   Vector3 position;
   Vector3 normal;
 };
+
+}

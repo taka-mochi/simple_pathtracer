@@ -2,12 +2,11 @@
 #include <sstream>
 #include <ctime>
 
-#include "Renderer.h"
-#include "CornellBoxScene.h"
-#include "TestScene.h"
-#include "Vector.h"
-#include "PPM.h"
-#include "Model.h"
+#include "renderer/Renderer.h"
+#include "scenes/CornellBoxScene.h"
+#include "scenes/TestScene.h"
+#include "tools/Vector.h"
+#include "tools/PPM.h"
 
 using namespace std;
 using namespace SimpleRenderer;

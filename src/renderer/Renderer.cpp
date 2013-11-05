@@ -1,10 +1,10 @@
 #include <iostream>
 #include <ctime>
 #include "Color.h"
-#include "Scene.h"
+#include "scenes/Scene.h"
 #include "Renderer.h"
 #include "Ray.h"
-#include "Random.h"
+#include "tools/Random.h"
 
 using namespace std;
 

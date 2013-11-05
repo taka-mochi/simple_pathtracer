@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Vector.h"
+#include "tools/Vector.h"
 
 namespace SimpleRenderer {
 

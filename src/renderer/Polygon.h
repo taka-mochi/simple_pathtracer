@@ -2,9 +2,9 @@
 
 #include "SceneObject.h"
 #include "Ray.h"
-#include "Constant.h"
+#include "tools/Constant.h"
 #include "HitInformation.h"
-#include "Matrix.h"
+#include "tools/Matrix.h"
 
 namespace SimpleRenderer {
 

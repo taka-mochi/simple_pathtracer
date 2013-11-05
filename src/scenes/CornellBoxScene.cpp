@@ -1,8 +1,8 @@
 
 #include <iostream>
 #include "CornellBoxScene.h"
-#include "Sphere.h"
-#include "Polygon.h"
+#include "renderer/Sphere.h"
+#include "renderer/Polygon.h"
 
 namespace SimpleRenderer {
 

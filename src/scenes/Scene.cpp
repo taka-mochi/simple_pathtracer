@@ -1,5 +1,5 @@
 #include "Scene.h"
-#include "BVH.h"
+#include "renderer/BVH.h"
 
 namespace SimpleRenderer {
 

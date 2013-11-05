@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Vector.h"
+#include "tools/Vector.h"
 #include "Ray.h"
-#include "Constant.h"
+#include "tools/Constant.h"
 
 namespace SimpleRenderer {
 

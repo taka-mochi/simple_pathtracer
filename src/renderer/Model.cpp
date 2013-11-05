@@ -2,8 +2,8 @@
 #include <fstream>
 #include "Model.h"
 #include "Polygon.h"
-#include "Utils.h"
-#include "Matrix.h"
+#include "tools/Utils.h"
+#include "tools/Matrix.h"
 
 
 using namespace std;

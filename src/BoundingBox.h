@@ -9,17 +9,17 @@ namespace SimpleRenderer {
 class BoundingBox {
 public:
   BoundingBox(const Vector3 &minPos = Vector3(0,0,0), const Vector3 &maxPos = Vector3(0,0,0))
-    : min_(minPos)
-    , max_(maxPos)
-    , centerPos_((minPos+maxPos)/2.0)
+    : m_min(minPos)
+    , m_max(maxPos)
+    , m_centerPos((minPos+maxPos)/2.0)
   {
   }
 
   double CalcVolume() const {
-    return (max_.x-min_.x)*(max_.y-min_.y)*(max_.z-min_.z);
+    return (m_max.x-m_min.x)*(m_max.y-m_min.y)*(m_max.z-m_min.z);
   }
   double CalcSurfaceArea() const {
-    double diff_x = max_.x-min_.x, diff_y = max_.y-min_.y, diff_z = max_.z-min_.z;
+    double diff_x = m_max.x-m_min.x, diff_y = m_max.y-m_min.y, diff_z = m_max.z-m_min.z;
     return diff_x*diff_y + diff_x*diff_z + diff_y*diff_z;
   }
 
@@ -30,8 +30,8 @@ public:
 
   void SetBox(const Vector3 &min_, const Vector3 &max_)
   {
-    this->min_ = min_; this->max_ = max_;
-    centerPos_ = (min_+max_)/2.0;
+    this->m_min = min_; this->m_max = max_;
+    m_centerPos = (m_min+m_max)/2.0;
   }
 
   inline bool Intersect(const Ray &ray, double &distance) const {
@@ -39,10 +39,10 @@ public:
     double fastest_out_t = INF;
     double latest_in_t = -INF;
 
-    double min_array[3] = {min_.x, min_.y, min_.z};
-    double max_array[3] = {max_.x, max_.y, max_.z};
+    double min_array[3] = {m_min.x, m_min.y, m_min.z};
+    double max_array[3] = {m_max.x, m_max.y, m_max.z};
     double ray_dir_array[3] = {ray.dir.x, ray.dir.y, ray.dir.z};
-    double ray_start_array[3] = {ray.begin.x, ray.begin.y, ray.begin.z};
+    double ray_start_array[3] = {ray.orig.x, ray.orig.y, ray.orig.z};
 
     return CheckIntersection(ray_dir_array, ray_start_array, min_array, max_array, distance);
   }
@@ -78,23 +78,23 @@ public:
   }
 
   void MergeAnotherBox(const BoundingBox &b2) {
-    min_.x = std::min(min_.x, b2.min_.x);
-    min_.y = std::min(min_.y, b2.min_.y);
-    min_.z = std::min(min_.z, b2.min_.z);
-    max_.x = std::max(max_.x, b2.max_.x);
-    max_.y = std::max(max_.y, b2.max_.y);
-    max_.z = std::max(max_.z, b2.max_.z);
-    centerPos_ = (min_+max_)/2;
+    m_min.x = std::min(m_min.x, b2.m_min.x);
+    m_min.y = std::min(m_min.y, b2.m_min.y);
+    m_min.z = std::min(m_min.z, b2.m_min.z);
+    m_max.x = std::max(m_max.x, b2.m_max.x);
+    m_max.y = std::max(m_max.y, b2.m_max.y);
+    m_max.z = std::max(m_max.z, b2.m_max.z);
+    m_centerPos = (m_min+m_max)/2;
   }
 
-  const Vector3 &min() const {return min_;}
-  const Vector3 &max() const {return max_;}
-  const Vector3 &position() const {return centerPos_;}
+  const Vector3 &min() const {return m_min;}
+  const Vector3 &max() const {return m_max;}
+  const Vector3 &position() const {return m_centerPos;}
 
 private:
-  Vector3 min_;
-  Vector3 max_;
-  Vector3 centerPos_;
+  Vector3 m_min;
+  Vector3 m_max;
+  Vector3 m_centerPos;
 };
 
 }

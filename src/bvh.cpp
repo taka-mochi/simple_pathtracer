@@ -38,7 +38,7 @@ bool BVH::CheckIntersection(const Ray &ray, Scene::IntersectionInformation &info
   next_list.push_back(m_root);
 
   float rayDir[3] = {ray.dir.x, ray.dir.y, ray.dir.z};
-  float rayOrig[3] = {ray.begin.x, ray.begin.y, ray.begin.z};
+  float rayOrig[3] = {ray.orig.x, ray.orig.y, ray.orig.z};
 
   while (!next_list.empty()) {
     BVH_structure *next = next_list.back();

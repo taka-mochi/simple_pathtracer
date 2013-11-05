@@ -23,7 +23,7 @@ public:
     // x: the origin of the ray
     // v: normalized direction of the ray
     // c: the center of this sphere
-    const Vector3 &x = ray.begin;
+    const Vector3 &x = ray.orig;
     const Vector3 &v = ray.dir;
     const Vector3 &c = position;
 

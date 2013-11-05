@@ -7,12 +7,12 @@ namespace SimpleRenderer {
 class Ray {
 public:
   Ray(const Vector3 &begin_, const Vector3 &dir_)
-    : begin(begin_)
+    : orig(begin_)
     , dir(dir_)
   {
   }
 
-  Vector3 begin;
+  Vector3 orig;
   Vector3 dir;
 };
 

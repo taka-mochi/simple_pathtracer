@@ -75,12 +75,12 @@ protected:
   std::vector<SceneObjectInfo> m_objects;
   std::vector<ModelObjectInfo> m_models;
 
+  BVH *m_bvh;
+
 private:
   Scene(const Scene &s) {}
   Scene &operator =(const Scene &s) {return *this;}
 
-protected:
-  BVH *m_bvh;
 };
 
 }

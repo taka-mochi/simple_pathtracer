@@ -60,7 +60,7 @@ public:
 
     if (det > EPS) {
       // solve u
-      Vector3 T(ray.begin - (m_rotatedPos[0]+position));
+      Vector3 T(ray.orig - (m_rotatedPos[0]+position));
       double u = P.dot(T);
 
       if (u>=0 && u<= det) {
@@ -73,7 +73,7 @@ public:
 
           if (t>=EPS) {
             hit.distance = t;
-            hit.position = ray.begin + ray.dir*t;
+            hit.position = ray.orig + ray.dir*t;
             hit.normal = m_normal;
 
             return true;

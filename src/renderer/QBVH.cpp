@@ -30,7 +30,7 @@ namespace SimpleRenderer {
       ray.dir.z >= 0 ? 0 : 1
     };
 
-    float zerof = 0.0f, inff = INF;
+    float zerof = 0.0f, inff = std::numeric_limits<float>::max();
     __m128 zero_m128 = _mm_load1_ps(&zerof);
     __m128 inf_m128 = _mm_load1_ps(&inff);
 
@@ -55,10 +55,10 @@ namespace SimpleRenderer {
 
     // search loop
     bool intersection_results[4];
-    std::vector<int> indicesStack;
+    std::vector<size_t> indicesStack;
     indicesStack.push_back(0);  // root index
     while (!indicesStack.empty()) {
-      int nextIndex = indicesStack.back();
+      size_t nextIndex = indicesStack.back();
       indicesStack.pop_back();
 
       QBVH_structure *node = &m_root[nextIndex];
@@ -67,6 +67,38 @@ namespace SimpleRenderer {
           node->bboxes, rayOrg, inversedRayDir, rayDirSign, zero_m128, inf_m128, intersection_results)) {
         // intersected
         // perform ordering according to axis and ray dir
+        int ordering[4];
+        bool isLeft = rayDirSign[node->axis_top] == 0;
+        int leftIndexFirst = isLeft ? 0 : 2;
+        int rightIndexFirst = (leftIndexFirst+2)%4;
+        // node->children[0,1] <- children in left side
+        // node->children[2,3] <- children in right side
+
+        // check left side ordering
+        if (rayDirSign[node->axis_left] == 0) {
+          ordering[leftIndexFirst] = 0; ordering[leftIndexFirst+1] = 1;
+        } else {
+          ordering[leftIndexFirst] = 1; ordering[leftIndexFirst+1] = 0;
+        }
+        // check right side ordering
+        if (rayDirSign[node->axis_right] == 0) {
+          ordering[rightIndexFirst] = 2; ordering[rightIndexFirst+1] = 3;
+        } else {
+          ordering[rightIndexFirst] = 3; ordering[rightIndexFirst+1] = 2;
+        }
+
+        for (int i = 0; i < 4; i++) {
+          int childindex = ordering[i];
+          if (intersection_results[childindex]) {
+            // intersected. check it
+            if (node->children[childindex] & (size_t)0x80000000) {
+              // this child node is a leaf
+            } else {
+              // this child node is not a leaf
+              indicesStack.push_back(node->children[childindex]);
+            }
+          }
+        }
       } else {
         // no intersection with these boxes (discards)
       }

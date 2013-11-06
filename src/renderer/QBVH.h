@@ -6,7 +6,7 @@
 namespace SimpleRenderer {
   class SceneObject;
   class Ray;
-  class Scene::IntersectionInformation;
+  struct Scene::IntersectionInformation;
 
   class QBVH {
   public:

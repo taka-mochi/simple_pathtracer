@@ -1,7 +1,7 @@
 
 namespace SimpleRenderer {
 
-#define INF 9999999999
+#define INF (FLT_MAX-1)
 #define PI 3.14159265358979323846264338327950288419716939
 #define EPS 0.001
 #define REFRACTIVE_INDEX_VACUUM 1.0

@@ -15,7 +15,7 @@ public:
   };
 
 public:
-  explicit BVH() : m_root(NULL), m_bvh_node_size(0) {}
+  explicit BVH() : m_root() {}
   ~BVH();
 
   void Construct(const CONSTRUCTION_TYPE type, const std::vector<SceneObject *> &targets);
@@ -26,9 +26,21 @@ private:
   void MakeLeaf_internal(const std::vector<SceneObject *> &targets, int index);
 
 private:
-  class BVH_structure;
-  BVH_structure *m_root;
-  int m_bvh_node_size;
+  static const int MAX_LEAF_COUNT_IN_ONE_BVH_NODE = 23;
+
+  class BVH_structure {
+  public:
+    //BoundingBox box;
+    float box[2][3];
+    unsigned int children[2];
+    //BVH_structure *children[2];
+    //std::vector<SceneObject *> objects;
+    SceneObject *objects[MAX_LEAF_COUNT_IN_ONE_BVH_NODE+1];
+
+    BVH_structure() {objects[0] = NULL;}
+  };
+  std::vector<BVH_structure> m_root;
+  //int m_bvh_node_size;
 };
 
 }

@@ -7,41 +7,29 @@
 using namespace std;
 
 namespace {
-  static const int MAX_LEAF_COUNT_IN_ONE_BVH_NODE = 23;
 };
 
 namespace SimpleRenderer {
 
-class BVH::BVH_structure {
-public:
-  //BoundingBox box;
-  float box[2][3];
-  unsigned int children[2];
-  //BVH_structure *children[2];
-  //std::vector<SceneObject *> objects;
-  SceneObject *objects[MAX_LEAF_COUNT_IN_ONE_BVH_NODE+1];
-
-  BVH_structure() {objects[0] = NULL;}
-};
-
 BVH::~BVH()
 {
-  delete [] m_root;
+  //delete [] m_root;
+  m_root.clear();
 }
 
 bool BVH::CheckIntersection(const Ray &ray, Scene::IntersectionInformation &info) const {
   info.hit.distance = INF;
   info.object = NULL;
 
-  std::vector<BVH_structure *> next_list;
-  next_list.reserve(m_bvh_node_size);
-  next_list.push_back(m_root);
+  std::vector<size_t> next_list;
+  next_list.reserve(m_root.size());
+  next_list.push_back(0);
 
-  float rayDir[3] = {ray.dir.x, ray.dir.y, ray.dir.z};
-  float rayOrig[3] = {ray.orig.x, ray.orig.y, ray.orig.z};
+  const float rayDir[3] = {static_cast<float>(ray.dir.x), static_cast<float>(ray.dir.y), static_cast<float>(ray.dir.z)};
+  const float rayOrig[3] = {static_cast<float>(ray.orig.x), static_cast<float>(ray.orig.y), static_cast<float>(ray.orig.z)};
 
   while (!next_list.empty()) {
-    BVH_structure *next = next_list.back();
+    const BVH_structure *next = &m_root[next_list.back()];
     next_list.pop_back();
 
     if (next->children[0] == -1) {
@@ -64,27 +52,27 @@ bool BVH::CheckIntersection(const Ray &ray, Scene::IntersectionInformation &info
       // internal node
       // check intersection with children
       float dist1 = INF, dist2 = INF;
-      BVH_structure *next1 = &m_root[next->children[0]];
+      const BVH_structure *next1 = &m_root[next->children[0]];
       bool hit1 = BoundingBox::CheckIntersection(rayDir, rayOrig, next1->box[0], next1->box[1], dist1);//next1->box.Intersect(ray, dist1);
       bool hit2 = false;
       if (next->children[1] >= 0) {
-        BVH_structure *next2 = &m_root[next->children[1]];
+        const BVH_structure *next2 = &m_root[next->children[1]];
         hit2 = BoundingBox::CheckIntersection(rayDir, rayOrig, next2->box[0], next2->box[1], dist1); //m_root[next->children[1]].box.Intersect(ray, dist2);
       }
       if (hit1 && hit2) {
         if (dist1 < dist2) {
           // check child1 at first
-          next_list.push_back(&m_root[next->children[1]]);
-          next_list.push_back(&m_root[next->children[0]]);
+          next_list.push_back(next->children[1]);
+          next_list.push_back(next->children[0]);
         } else {
           // check child2 at first
-          next_list.push_back(&m_root[next->children[0]]);
-          next_list.push_back(&m_root[next->children[1]]);
+          next_list.push_back(next->children[0]);
+          next_list.push_back(next->children[1]);
         }
       } else if (hit1) {
-        next_list.push_back(&m_root[next->children[0]]);
+        next_list.push_back(next->children[0]);
       } else if (hit2) {
-        next_list.push_back(&m_root[next->children[1]]);
+        next_list.push_back(next->children[1]);
       }
     }
   }
@@ -94,17 +82,19 @@ bool BVH::CheckIntersection(const Ray &ray, Scene::IntersectionInformation &info
 
 void BVH::Construct(const BVH::CONSTRUCTION_TYPE type, const std::vector<SceneObject *> &targets)
 {
-  if (m_root != NULL) {
-    delete [] m_root;
-  }
+  //if (m_root != NULL) {
+  //  delete [] m_root;
+  //}
+  m_root.clear();
 
   // how many nodes are required????
   // Should I use dynamic array (vector)???
 
-  //m_root = new BVH_structure[targets.size()*targets.size()+1]; // max size is 2*N+1
-  m_root = new BVH_structure[8*targets.size()+1]; // max size is 2*N+1
+  //m_root = new BVH_structure[8*targets.size()+1]; // max size is 2*N+1
+  m_root.reserve(8*targets.size());
   //m_bvh_node_size = targets.size()*targets.size()+1;
-  m_bvh_node_size = 8*targets.size()+1;
+  //m_bvh_node_size = 8*targets.size()+1;
+  m_root.push_back(BVH_structure());
 
   Construct_internal(type, targets, 0);
 }
@@ -128,20 +118,20 @@ void CalcBoundingBoxOfObjects(const std::vector<SceneObject *> &objects, Boundin
 
 template <typename FLOATING> void CalcBoundingBoxOfObjects(const std::vector<SceneObject *> &objects, FLOATING min[3], FLOATING max[3])
 {
-  min[0] = objects[0]->boundingBox.min().x;
-  min[1] = objects[0]->boundingBox.min().y;
-  min[2] = objects[0]->boundingBox.min().z;
-  max[0] = objects[0]->boundingBox.max().x;
-  max[1] = objects[0]->boundingBox.max().y;
-  max[2] = objects[0]->boundingBox.max().z;
+  min[0] = static_cast<FLOATING>(objects[0]->boundingBox.min().x);
+  min[1] = static_cast<FLOATING>(objects[0]->boundingBox.min().y);
+  min[2] = static_cast<FLOATING>(objects[0]->boundingBox.min().z);
+  max[0] = static_cast<FLOATING>(objects[0]->boundingBox.max().x);
+  max[1] = static_cast<FLOATING>(objects[0]->boundingBox.max().y);
+  max[2] = static_cast<FLOATING>(objects[0]->boundingBox.max().z);
   std::for_each(objects.begin(), objects.end(),
     [&min, &max](const SceneObject * const &a) {
-      if (a->boundingBox.min().x < min[0]) min[0] = a->boundingBox.min().x;
-      if (a->boundingBox.min().y < min[1]) min[1] = a->boundingBox.min().y;
-      if (a->boundingBox.min().z < min[2]) min[2] = a->boundingBox.min().z;
-      if (a->boundingBox.max().x > max[0]) max[0] = a->boundingBox.max().x;
-      if (a->boundingBox.max().y > max[1]) max[1] = a->boundingBox.max().y;
-      if (a->boundingBox.max().z > max[2]) max[2] = a->boundingBox.max().z;
+      if (a->boundingBox.min().x < min[0]) min[0] = static_cast<FLOATING>(a->boundingBox.min().x);
+      if (a->boundingBox.min().y < min[1]) min[1] = static_cast<FLOATING>(a->boundingBox.min().y);
+      if (a->boundingBox.min().z < min[2]) min[2] = static_cast<FLOATING>(a->boundingBox.min().z);
+      if (a->boundingBox.max().x > max[0]) max[0] = static_cast<FLOATING>(a->boundingBox.max().x);
+      if (a->boundingBox.max().y > max[1]) max[1] = static_cast<FLOATING>(a->boundingBox.max().y);
+      if (a->boundingBox.max().z > max[2]) max[2] = static_cast<FLOATING>(a->boundingBox.max().z);
   });
 
 }
@@ -154,13 +144,13 @@ void BVH::MakeLeaf_internal(const std::vector<SceneObject *> &targets, int index
   for (size_t i=0; i<targets.size(); i++)
     st->objects[i] = targets[i];
   st->objects[targets.size()] = NULL;
-  CalcBoundingBoxOfObjects(targets, st->box[0], st->box[1]);
+  CalcBoundingBoxOfObjects<float>(targets, st->box[0], st->box[1]);
 }
 
 
 void BVH::Construct_internal(const CONSTRUCTION_TYPE type, const std::vector<SceneObject *> &targets, int index)
 {
-  assert (index < m_bvh_node_size);
+  //assert (index < m_bvh_node_size);
 
   const double T_aabb = 1.0; // cost of check intersection of AABB
   const double T_tri = 1.0; // cost of check intersection of Triangle
@@ -292,8 +282,9 @@ void BVH::Construct_internal(const CONSTRUCTION_TYPE type, const std::vector<Sce
 
   BVH_structure *current = &m_root[index];
   // heap structure
-  current->children[0] = index*2+1;
-  current->children[1] = index*2+2;
+  current->children[0] = m_root.size();
+  current->children[1] = m_root.size()+1;
+  m_root.push_back(BVH_structure()); m_root.push_back(BVH_structure());
 
   // constructs children
   Construct_internal(type, lefts, current->children[0]);

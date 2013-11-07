@@ -48,13 +48,13 @@ public:
     return CheckIntersection(ray_dir_array, ray_start_array, min_array, max_array, distance);
   }
 
-  template <typename FLOATING> static bool CheckIntersection(FLOATING rayDir[3], FLOATING rayOrig[3], FLOATING minbox[3], FLOATING maxbox[3], FLOATING &distance) {
+  template <typename FLOATING> static bool CheckIntersection(const FLOATING rayDir[3], const FLOATING rayOrig[3], const FLOATING minbox[3], const FLOATING maxbox[3], FLOATING &distance) {
     FLOATING fastest_out_t = INF;
     FLOATING latest_in_t = -INF;
 
     for (int i=0; i<3; i++) {
       FLOATING t_min = INF, t_max = -INF;
-      FLOATING inv = rayDir[i] != 0 ? 1.0/rayDir[i] : INF;
+      FLOATING inv = rayDir[i] != 0 ? 1.0f/rayDir[i] : static_cast<FLOATING>(INF);
       FLOATING t1 = (minbox[i] - rayOrig[i])*inv;
       FLOATING t2 = (maxbox[i] - rayOrig[i])*inv;
       t_min = std::min(t1, t2);

@@ -1,4 +1,5 @@
 #include <vector>
+#include <limits>
 #include "QBVH.h"
 
 #include "SceneObject.h"
@@ -15,8 +16,6 @@ namespace SimpleRenderer {
   };
 
   QBVH::~QBVH() {
-    delete [] m_root;
-    m_root = NULL;
   }
 
   void QBVH::Construct(const std::vector<SceneObject *> &targets) {
@@ -24,30 +23,33 @@ namespace SimpleRenderer {
 
   bool QBVH::CheckIntersection(const Ray &ray, Scene::IntersectionInformation &info) const {
     // initialize
-    int rayDirSign[3] = {
+    const int rayDirSign[3] = {
       ray.dir.x >= 0 ? 0 : 1,
       ray.dir.y >= 0 ? 0 : 1,
       ray.dir.z >= 0 ? 0 : 1
     };
 
-    float zerof = 0.0f, inff = std::numeric_limits<float>::max();
-    __m128 zero_m128 = _mm_load1_ps(&zerof);
-    __m128 inf_m128 = _mm_load1_ps(&inff);
+    const float zerof = 0.0f, inff = std::numeric_limits<float>::max();
+    const __m128 zero_m128 = _mm_load1_ps(&zerof);
+    const __m128 inf_m128 = _mm_load1_ps(&inff);
 
-    float rayorg[3] = {ray.orig.x, ray.orig.y, ray.orig.z};
-    __m128 rayOrg[3] = {
+    const float rayorg[3] = {
+      static_cast<float>(ray.orig.x),
+      static_cast<float>(ray.orig.y),
+      static_cast<float>(ray.orig.z)
+    };
+    const __m128 rayOrg[3] = {
       _mm_load1_ps(rayorg+0), // x
       _mm_load1_ps(rayorg+1), // y
       _mm_load1_ps(rayorg+2)  // z
     };
 
-
-    float raydir[3] = {
-      ray.dir.x == 0 ? INF : 1.0f/ray.dir.x,
-      ray.dir.y == 0 ? INF : 1.0f/ray.dir.y,
-      ray.dir.z == 0 ? INF : 1.0f/ray.dir.z
+    const float raydir[3] = {
+      ray.dir.x == 0 ? INF : static_cast<float>(1.0f/ray.dir.x),
+      ray.dir.y == 0 ? INF : static_cast<float>(1.0f/ray.dir.y),
+      ray.dir.z == 0 ? INF : static_cast<float>(1.0f/ray.dir.z)
     };
-    __m128 inversedRayDir[3] = {
+    const __m128 inversedRayDir[3] = {
       _mm_load1_ps(raydir+0), // x
       _mm_load1_ps(raydir+1), // y
       _mm_load1_ps(raydir+2)  // z
@@ -61,16 +63,16 @@ namespace SimpleRenderer {
       size_t nextIndex = indicesStack.back();
       indicesStack.pop_back();
 
-      QBVH_structure *node = &m_root[nextIndex];
+      const QBVH_structure *node = &m_root[nextIndex];
 
       if (BoundingBox::CheckIntersection4floatAABB(
           node->bboxes, rayOrg, inversedRayDir, rayDirSign, zero_m128, inf_m128, intersection_results)) {
         // intersected
         // perform ordering according to axis and ray dir
-        int ordering[4];
-        bool isLeft = rayDirSign[node->axis_top] == 0;
-        int leftIndexFirst = isLeft ? 0 : 2;
-        int rightIndexFirst = (leftIndexFirst+2)%4;
+        size_t ordering[4];
+        const bool isLeft = rayDirSign[node->axis_top] == 0;
+        const int leftIndexFirst = isLeft ? 0 : 2;
+        const int rightIndexFirst = (leftIndexFirst+2)%4;
         // node->children[0,1] <- children in left side
         // node->children[2,3] <- children in right side
 
@@ -93,6 +95,8 @@ namespace SimpleRenderer {
             // intersected. check it
             if (node->children[childindex] & (size_t)0x80000000) {
               // this child node is a leaf
+              size_t leafstartindex = node->children[childindex]^((size_t)0x80000000);
+              if (CheckIntersection_Leaf(ray, leafstartindex, info)) return true; // early return: no need further search
             } else {
               // this child node is not a leaf
               indicesStack.push_back(node->children[childindex]);
@@ -104,9 +108,33 @@ namespace SimpleRenderer {
       }
 
     }
+    return false;
+  }
+
+  bool QBVH::CheckIntersection_Leaf(const Ray &ray, size_t leafStartIndex, Scene::IntersectionInformation &hitResultDetail) const {
+    double nearestDist = -1;
+    HitInformation info;
+    for (size_t i=leafStartIndex; m_leafObjectArray[i]; i++) {
+      assert (i+1<m_leafObjectArray.size());
+
+      const SceneObject *obj = m_leafObjectArray[i];
+      if (obj->CheckIntersection(ray, info) && (nearestDist < 0 || info.distance < nearestDist)) {
+        hitResultDetail.hit = info;
+        hitResultDetail.object = m_leafObjectArray[i];
+        nearestDist = info.distance;
+      }
+    }
+
+    return (nearestDist > 0);
   }
 
   void QBVH::Construct_internal(const std::vector<SceneObject *> &targets, int index) {
+
+    // leaf style:
+    // [OBJ, OBJ, NULL, OBJ, NULL, OBJ, OBJ, OBJ, NULL, ...]
+    // => m_leafObjectArray requires maximum size of "2*targets.size()" size
+    m_leafObjectArray.clear(); m_leafObjectArray.reserve(targets.size()*2);
+    //m_leafObjectArray.reset(new SceneObject*[targets.size()*2], std::default_delete<SceneObject *[]>());
   }
   void QBVH::MakeLeaf_internal(const std::vector<SceneObject *> &targets, int index) {
   }

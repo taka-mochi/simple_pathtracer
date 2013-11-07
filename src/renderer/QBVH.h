@@ -10,7 +10,7 @@ namespace SimpleRenderer {
 
   class QBVH {
   public:
-    explicit QBVH() : m_root(NULL) {}
+    explicit QBVH() : m_root(), m_leafObjectArray(NULL) {}
     ~QBVH();
 
     void Construct(const std::vector<SceneObject *> &targets);
@@ -20,9 +20,12 @@ namespace SimpleRenderer {
     void Construct_internal(const std::vector<SceneObject *> &targets, int index);
     void MakeLeaf_internal(const std::vector<SceneObject *> &targets, int index);
 
+    bool CheckIntersection_Leaf(const Ray &ray, size_t leafStartIndex, Scene::IntersectionInformation &hitResultDetail) const;
+
   private:
     struct QBVH_structure;
-    QBVH_structure *m_root;
-
+    std::vector<QBVH_structure> m_root;
+    std::vector<SceneObject *> m_leafObjectArray;
+    
   };
 }

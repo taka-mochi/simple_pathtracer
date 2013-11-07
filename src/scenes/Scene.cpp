@@ -1,5 +1,6 @@
 #include "Scene.h"
 #include "renderer/BVH.h"
+#include "renderer/QBVH.h"
 
 namespace SimpleRenderer {
 
@@ -16,7 +17,8 @@ Scene::~Scene() {
       delete info.model;
     }
   }
-  if (m_bvh) delete m_bvh;
+  delete m_bvh;
+  delete m_qbvh;
 }
 
 void Scene::ConstructBVH()
@@ -28,11 +30,21 @@ void Scene::ConstructBVH()
   m_bvh->Construct(BVH::CONSTRUCTION_OBJECT_MEDIAN, m_inBVHObjects);
 }
 
+void Scene::ConstructQBVH()
+{
+  if (m_qbvh) delete m_qbvh;
+
+  m_qbvh = new QBVH();
+  m_qbvh->Construct(m_inBVHObjects);
+}
+
 bool Scene::CheckIntersection(const Ray &ray, IntersectionInformation &info) const {
   info.hit.distance = INF;
   info.object = NULL;
 
-  if (m_bvh) {
+  if (m_qbvh) {
+    m_qbvh->CheckIntersection(ray, info);
+  } else if (m_bvh) {
     m_bvh->CheckIntersection(ray, info);
   } else {
     std::vector<SceneObject *>::const_iterator it,end = m_inBVHObjects.end();

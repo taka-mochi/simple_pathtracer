@@ -281,7 +281,7 @@ void BVH::Construct_internal(const CONSTRUCTION_TYPE type, const std::vector<Sce
   lefts.resize(bestIndex+1);
 
   BVH_structure *current = &m_root[index];
-  // heap structure
+  current->axis = bestAxis;
   current->children[0] = m_root.size();
   current->children[1] = m_root.size()+1;
   m_root.push_back(BVH_structure()); m_root.push_back(BVH_structure());
@@ -289,6 +289,33 @@ void BVH::Construct_internal(const CONSTRUCTION_TYPE type, const std::vector<Sce
   // constructs children
   Construct_internal(type, lefts, current->children[0]);
   Construct_internal(type, rights, current->children[1]);
+}
+
+const BVH::BVH_structure *BVH::GetRootNode() const {
+  return &m_root[0];
+}
+
+size_t BVH::GetBVHNodeCount() const {
+  return m_root.size();
+}
+
+const BVH::BVH_structure *BVH::GetFirstChild(const BVH::BVH_structure *parent) const {
+  assert (parent);
+  if (IsLeaf(parent)) return NULL;
+  assert (m_root.size() > parent->children[0]);
+  return &m_root[parent->children[0]];
+}
+
+const BVH::BVH_structure *BVH::GetSecondChild(const BVH::BVH_structure *parent) const {
+  assert (parent);
+  if (IsLeaf(parent)) return NULL;
+  assert (m_root.size() > parent->children[1]);
+  return &m_root[parent->children[1]];
+}
+
+bool BVH::IsLeaf(const BVH_structure *node) const {
+  assert (node);
+  return node->children[0] == static_cast<size_t>(-1);
 }
 
 }

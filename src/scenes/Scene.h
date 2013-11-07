@@ -10,6 +10,7 @@ namespace SimpleRenderer {
 
 class SceneObject;
 class BVH;
+class QBVH;
 
 class Scene {
 public:
@@ -22,11 +23,12 @@ public:
   virtual ~Scene();
 
   void ConstructBVH();
+  void ConstructQBVH();
 
   bool CheckIntersection(const Ray &ray, IntersectionInformation &info) const;
 
 protected:
-  Scene() : m_objects(), m_models(), m_inBVHObjects(), m_notInBVHObjects(), m_bvh(NULL) {}
+  Scene() : m_objects(), m_models(), m_inBVHObjects(), m_notInBVHObjects(), m_bvh(NULL), m_qbvh(NULL) {}
 
   void AddObject(SceneObject *obj, bool doDelete = true, bool containedInBVH = true) {
     m_objects.push_back(SceneObjectInfo(obj, doDelete, containedInBVH));
@@ -76,6 +78,7 @@ protected:
   std::vector<ModelObjectInfo> m_models;
 
   BVH *m_bvh;
+  QBVH *m_qbvh;
 
 private:
   Scene(const Scene &s) {}

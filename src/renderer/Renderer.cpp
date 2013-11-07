@@ -85,7 +85,7 @@ void PathTracer::ScanPixelsAndCastRays(const Scene &scene, const Vector3 &screen
   processed_y_counts = 0;
   // trace all pixels
   const double averaging_factor = next_samples * m_supersamples * m_supersamples;
-#pragma omp parallel for num_threads(8)
+#pragma omp parallel for num_threads(2)
   for (int y=0; y<m_height; y++) {
     Random rnd(y+1+previous_samples*m_height);
     for (int x=0; x<m_width; x++) {

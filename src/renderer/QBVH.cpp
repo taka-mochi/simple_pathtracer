@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <limits>
+#include <malloc.h>
 #include "QBVH.h"
 #include "BVH.h"
 
@@ -21,11 +22,11 @@ namespace SimpleRenderer {
       ray.dir.z >= 0 ? 0 : 1
     };
 
-    const float zerof = 0.0f, inff = std::numeric_limits<float>::max();
+    __declspec(align(16)) const float zerof = 0.0f, inff = std::numeric_limits<float>::max();
     const __m128 zero_m128 = _mm_load1_ps(&zerof);
     const __m128 inf_m128 = _mm_load1_ps(&inff);
 
-    const float rayorg[3] = {
+    __declspec(align(16)) const float rayorg[3] = {
       static_cast<float>(ray.orig.x),
       static_cast<float>(ray.orig.y),
       static_cast<float>(ray.orig.z)
@@ -36,7 +37,7 @@ namespace SimpleRenderer {
       _mm_load1_ps(rayorg+2)  // z
     };
 
-    const float raydir[3] = {
+    __declspec(align(16)) const float raydir[3] = {
       ray.dir.x == 0 ? INF : static_cast<float>(1.0f/ray.dir.x),
       ray.dir.y == 0 ? INF : static_cast<float>(1.0f/ray.dir.y),
       ray.dir.z == 0 ? INF : static_cast<float>(1.0f/ray.dir.z)
@@ -134,7 +135,14 @@ namespace SimpleRenderer {
 
     // allocate memory
     m_allocatedQBVHNodeSize = bvh.GetBVHNodeCount();
-    m_root.reset(new QBVH_structure[m_allocatedQBVHNodeSize], std::default_delete<QBVH_structure[]>());
+    // +16 -> for 16byte alignment
+    //m_memoryPoolForQBVH.reset(new unsigned char[sizeof(QBVH_structure)*m_allocatedQBVHNodeSize+16], std::default_delete<unsigned char[]>());
+    //unsigned char *poolRoot = m_memoryPoolForQBVH.get();
+    //unsigned int offset = 16-reinterpret_cast<unsigned int>(poolRoot)%16;
+    //m_root = new(poolRoot+offset) QBVH_structure[m_allocatedQBVHNodeSize];
+    QBVH_structure *alignedRoot = new(_aligned_malloc(sizeof(QBVH_structure)*m_allocatedQBVHNodeSize, 16)) QBVH_structure[m_allocatedQBVHNodeSize];
+    m_root.reset(alignedRoot, [](void *p){_aligned_free(p);});
+
     memset(m_root.get(), 0, sizeof(QBVH_structure)*m_allocatedQBVHNodeSize);
     m_usedNodeCount = 1; // for the root node
 
@@ -192,7 +200,7 @@ namespace SimpleRenderer {
           const BVH::BVH_structure *grandchild = grandchildren[j];
 
           size_t childindex = i*2+j;
-          insertOneBox_to_four_boxes(child->box, childindex);
+          insertOneBox_to_four_boxes(grandchild->box, childindex);
 
           if (bvh.IsLeaf(grandchild)) {
             // grandchild is a leaf => MakeLeaf

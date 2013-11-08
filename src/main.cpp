@@ -24,7 +24,7 @@ public:
   void operator()(int samples, const Color *img) {
   	cerr << "save ppm file for sample " << samples << " ..." << endl;
     char name[1024];
-    sprintf(name, "result_sah_bunny_%04d_%dx%d.ppm", samples, supersampling, supersampling);
+    sprintf(name, "result_qbvh_torii_%04d_%dx%d.ppm", samples, supersampling, supersampling);
     clock_t begin,end;
     begin = clock();
     PPM::Save(name, img, w, h);

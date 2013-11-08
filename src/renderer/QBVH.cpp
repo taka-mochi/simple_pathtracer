@@ -126,7 +126,7 @@ namespace SimpleRenderer {
       }
     }
 
-    return (nearestDist > 0);
+    return (nearestDist >= 0);
   }
 
   void QBVH::Construct(const std::vector<SceneObject *> &targets) {
@@ -242,7 +242,7 @@ namespace SimpleRenderer {
     return (static_cast<size_t>(0x80000000) & childindex) != 0;
   }
   bool QBVH::IsValidIndex(size_t index) {
-    return index == static_cast<size_t>(-1);
+    return index != static_cast<size_t>(-1);
   }
   size_t QBVH::GetIndexOfObjectInChildLeaf(size_t childleafindex) {
     return static_cast<size_t>(0x80000000) ^ childleafindex;

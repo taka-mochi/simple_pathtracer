@@ -244,4 +244,36 @@ namespace SimpleRenderer {
     return static_cast<size_t>(0x80000000) ^ childleafindex;
   }
 
+  void QBVH::CollectBoundingBoxes(int depth, std::vector<BoundingBox> &result) {
+    // for Visualization
+    result.clear();
+    result.reserve(m_usedNodeCount);
+    CollectBoundingBoxes_internal(0, depth, 0, result);
+  }
+
+  void QBVH::CollectBoundingBoxes_internal(int currentDepth, int targetDepth, int index, std::vector<BoundingBox> &result) {
+    if (targetDepth < currentDepth) return;
+
+    QBVH_structure *current = &m_root.get()[index];
+
+    if (targetDepth == currentDepth)
+    {
+      __declspec(align(16)) float bboxes[2][3][4];
+      for (int min_max=0; min_max<2; min_max++) for (int xyz=0; xyz<3; xyz++) {
+        _mm_store_ps(bboxes[min_max][xyz], current->bboxes[min_max][xyz]);
+      }
+
+      for (int i=0; i<4; i++) {
+        BoundingBox box(Vector3(bboxes[0][0][i], bboxes[0][1][i], bboxes[0][2][i]), Vector3(bboxes[1][0][i], bboxes[1][1][i], bboxes[1][2][i]));
+        result.push_back(box);
+      }
+      return;
+    }
+
+    for (int i=0; i<4; i++) {
+      if (!IsChildindexLeaf(current->children[i])) {
+        CollectBoundingBoxes_internal(currentDepth+1, targetDepth, current->children[i], result);
+      }
+    }
+  }
 }

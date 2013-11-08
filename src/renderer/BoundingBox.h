@@ -15,6 +15,9 @@ public:
     , m_centerPos((minPos+maxPos)/2.0)
   {
   }
+  BoundingBox(const float minPos[3], const float maxPos[3]) {
+    SetBox(minPos, maxPos);
+  }
 
   double CalcVolume() const {
     return (m_max.x-m_min.x)*(m_max.y-m_min.y)*(m_max.z-m_min.z);
@@ -27,6 +30,11 @@ public:
   template <typename FLOATING> static FLOATING CalcSurfaceArea(FLOATING min[3], FLOATING max[3]) {
     FLOATING diff[3] = {max[0]-min[0], max[1]-min[1], max[2]-min[2]};
     return diff[0]*diff[1] + diff[1]*diff[2] + diff[0]*diff[2];
+  }
+
+  template <typename FLOATING> void SetBox(const FLOATING min[3], const FLOATING max[3]) {
+    SetBox(Vector3(static_cast<double>(min[0]), static_cast<double>(min[1]), static_cast<double>(min[2])),
+      Vector3(static_cast<double>(max[0]), static_cast<double>(max[1]), static_cast<double>(max[2])));
   }
 
   void SetBox(const Vector3 &min_, const Vector3 &max_)

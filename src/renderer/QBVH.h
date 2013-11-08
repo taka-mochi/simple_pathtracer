@@ -17,6 +17,8 @@ namespace SimpleRenderer {
     void Construct(const std::vector<SceneObject *> &targets);
     bool CheckIntersection(const Ray &ray, Scene::IntersectionInformation &info) const;
 
+    void CollectBoundingBoxes(int depth, std::vector<BoundingBox> &result); // for Visualization
+
   private:
     void Construct_internal(size_t nextindex, const BVH &bvh, const BVH::BVH_structure *nextTarget);
     void MakeLeaf_internal(size_t index, const BVH::BVH_structure *leaf, size_t childindex);
@@ -27,6 +29,8 @@ namespace SimpleRenderer {
     static size_t GetInvalidChildIndex();
     static bool IsChildindexLeaf(size_t childindex);
     static size_t GetIndexOfObjectInChildLeaf(size_t childleafindex);
+
+    void CollectBoundingBoxes_internal(int currentDepth, int targetDepth, int index, std::vector<BoundingBox> &result);
 
   private:
     struct QBVH_structure  {

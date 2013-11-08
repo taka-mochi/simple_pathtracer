@@ -142,8 +142,8 @@ void BVH::MakeLeaf_internal(const std::vector<SceneObject *> &targets, int index
   BVH_structure *st = &m_root[index];
   st->children[0] = st->children[1] = -1;
   for (size_t i=0; i<targets.size(); i++)
-    st->objects[i] = targets[i];
-  st->objects[targets.size()] = NULL;
+    st->objects.push_back(targets[i]);
+  st->objects.push_back(NULL);
   CalcBoundingBoxOfObjects<float>(targets, st->box[0], st->box[1]);
 }
 

@@ -33,6 +33,8 @@ namespace SimpleRenderer {
 
     void CollectBoundingBoxes_internal(int currentDepth, int targetDepth, int index, std::vector<BoundingBox> &result);
 
+    void ReallocateQBVH_root(size_t addSize);
+
   private:
     struct QBVH_structure  {
       __m128 bboxes[2][3];//4 float min-max xyz

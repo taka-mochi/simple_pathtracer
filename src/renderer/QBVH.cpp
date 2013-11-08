@@ -93,6 +93,7 @@ namespace SimpleRenderer {
             if (IsChildindexLeaf(node->children[childindex])) {
               // this child node is a leaf
               size_t leafstartindex = GetIndexOfObjectInChildLeaf(node->children[childindex]);
+              //cerr << "orig:" << node->children[childindex] << " converted:" << leafstartindex << endl;
               Scene::IntersectionInformation infoTmp;
               if (CheckIntersection_Leaf(ray, leafstartindex, infoTmp)) {
                   info = infoTmp;
@@ -118,6 +119,7 @@ namespace SimpleRenderer {
     for (size_t i=leafStartIndex; m_leafObjectArray[i]; i++) {
       assert (i+1<m_leafObjectArray.size());
 
+//      cerr << i << endl;
       const SceneObject *obj = m_leafObjectArray[i];
       if (obj->CheckIntersection(ray, info) && (nearestDist < 0 || info.distance < nearestDist)) {
         hitResultDetail.hit = info;
@@ -135,16 +137,13 @@ namespace SimpleRenderer {
     bvh.Construct(BVH::CONSTRUCTION_OBJECT_SAH, targets);
 
     // allocate memory
-    m_allocatedQBVHNodeSize = bvh.GetBVHNodeCount();
+    ReallocateQBVH_root(bvh.GetBVHNodeCount());
     // +16 -> for 16byte alignment
     //m_memoryPoolForQBVH.reset(new unsigned char[sizeof(QBVH_structure)*m_allocatedQBVHNodeSize+16], std::default_delete<unsigned char[]>());
     //unsigned char *poolRoot = m_memoryPoolForQBVH.get();
     //unsigned int offset = 16-reinterpret_cast<unsigned int>(poolRoot)%16;
     //m_root = new(poolRoot+offset) QBVH_structure[m_allocatedQBVHNodeSize];
-    QBVH_structure *alignedRoot = new(_aligned_malloc(sizeof(QBVH_structure)*m_allocatedQBVHNodeSize, 16)) QBVH_structure[m_allocatedQBVHNodeSize];
-    m_root.reset(alignedRoot, [](void *p){_aligned_free(p);});
 
-    memset(m_root.get(), 0, sizeof(QBVH_structure)*m_allocatedQBVHNodeSize);
     m_usedNodeCount = 1; // for the root node
 
     // leaf style:
@@ -156,6 +155,18 @@ namespace SimpleRenderer {
     const BVH::BVH_structure *bvh_root = bvh.GetRootNode();
 
     Construct_internal(0, bvh, bvh_root);
+  }
+
+  void QBVH::ReallocateQBVH_root(size_t addSize) {
+    size_t newSize = m_allocatedQBVHNodeSize + addSize;
+    QBVH_structure *alignedRoot = new(_aligned_malloc(sizeof(QBVH_structure)*newSize, 16)) QBVH_structure[newSize];
+    if (m_root) {
+      std::copy(m_root.get(), m_root.get()+m_allocatedQBVHNodeSize, alignedRoot);
+    }
+    memset(alignedRoot+m_allocatedQBVHNodeSize, 0, sizeof(QBVH_structure)*addSize);
+    m_root.reset(alignedRoot, [](void *p){_aligned_free(p);});
+
+    m_allocatedQBVHNodeSize = newSize;
   }
 
   void QBVH::Construct_internal(size_t nextindex, const BVH &bvh, const BVH::BVH_structure *nextTarget) {
@@ -209,6 +220,7 @@ namespace SimpleRenderer {
           } else {
             // grandchild is not a leaf => make new nodes and recursively call this function
             size_t nextNewNodeIndex = m_usedNodeCount;
+            if (nextNewNodeIndex >= m_allocatedQBVHNodeSize) ReallocateQBVH_root(bvh.GetBVHNodeCount());
             current->children[childindex] = nextNewNodeIndex;
             m_usedNodeCount++;
             Construct_internal(nextNewNodeIndex, bvh, grandchild);

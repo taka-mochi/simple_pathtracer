@@ -25,9 +25,9 @@ public:
     //BVH_structure *children[2];
     //std::vector<SceneObject *> objects;
     int axis;
-    SceneObject *objects[MAX_LEAF_COUNT_IN_ONE_BVH_NODE+1];
+    std::vector<SceneObject *> objects;
 
-    BVH_structure() {objects[0] = NULL;}
+    BVH_structure() : objects() {}
   };
 
 public:

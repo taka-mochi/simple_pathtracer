@@ -15,11 +15,12 @@ public:
     memcpy(m, m_, sizeof(m));
   }
 
-  static Matrix RotateAroundVector(const Vector3 &vec, double shita) {
+  static Matrix RotateAroundVector(const Vector3 &vec_, double shita) {
     Matrix m;
     double cos_shita = cos(shita);
     double sin_shita = sin(shita);
     double one_minus_cos = 1-cos_shita;
+    Vector3 vec(vec_); vec.normalize();
 
     m.m[0][0] = vec.x*vec.x*one_minus_cos + cos_shita; m.m[0][1] = vec.x*vec.y*one_minus_cos - vec.z*sin_shita; m.m[0][2] = vec.z*vec.x*one_minus_cos + vec.y*sin_shita;
     m.m[1][0] = vec.x*vec.y*one_minus_cos + vec.z*sin_shita; m.m[1][1] = vec.y*vec.y*one_minus_cos + cos_shita; m.m[1][2] = vec.z*vec.y*one_minus_cos - vec.x*sin_shita;

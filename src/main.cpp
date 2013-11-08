@@ -13,9 +13,9 @@ using namespace SimpleRenderer;
 
 static const int supersampling = 4;
 
-static const int startSample = 14;
+static const int startSample = 2;
 static const int endSample = 1024;
-static const int stepSample = 10;
+static const int stepSample = 2;
 
 class SavePPM_callback : public PathTracer::RenderingFinishCallback {
   int w,h;

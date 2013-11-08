@@ -28,6 +28,7 @@ namespace SimpleRenderer {
     static size_t SetChildindexAsLeaf(size_t childindex);
     static size_t GetInvalidChildIndex();
     static bool IsChildindexLeaf(size_t childindex);
+    static bool IsValidIndex(size_t index);
     static size_t GetIndexOfObjectInChildLeaf(size_t childleafindex);
 
     void CollectBoundingBoxes_internal(int currentDepth, int targetDepth, int index, std::vector<BoundingBox> &result);

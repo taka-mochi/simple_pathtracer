@@ -58,6 +58,8 @@ namespace SimpleRenderer {
       size_t nextIndex = indicesStack.back();
       indicesStack.pop_back();
 
+      assert (nextIndex < m_usedNodeCount);
+
       const QBVH_structure *node = &root[nextIndex];
 
       if (BoundingBox::CheckIntersection4floatAABB(
@@ -86,14 +88,13 @@ namespace SimpleRenderer {
 
         for (int i = 0; i < 4; i++) {
           int childindex = ordering[i];
-          if (intersection_results[childindex]) {
+          if (intersection_results[childindex] && IsValidIndex(node->children[childindex])) {
             // intersected. check it
             if (IsChildindexLeaf(node->children[childindex])) {
               // this child node is a leaf
               size_t leafstartindex = GetIndexOfObjectInChildLeaf(node->children[childindex]);
               Scene::IntersectionInformation infoTmp;
-              if (leafstartindex != static_cast<size_t>(-1) &&
-                CheckIntersection_Leaf(ray, leafstartindex, infoTmp)) {
+              if (CheckIntersection_Leaf(ray, leafstartindex, infoTmp)) {
                   info = infoTmp;
                   return true; // early return: no need further search
               }
@@ -239,6 +240,9 @@ namespace SimpleRenderer {
   }
   bool QBVH::IsChildindexLeaf(size_t childindex) {
     return (static_cast<size_t>(0x80000000) & childindex) != 0;
+  }
+  bool QBVH::IsValidIndex(size_t index) {
+    return index == static_cast<size_t>(-1);
   }
   size_t QBVH::GetIndexOfObjectInChildLeaf(size_t childleafindex) {
     return static_cast<size_t>(0x80000000) ^ childleafindex;

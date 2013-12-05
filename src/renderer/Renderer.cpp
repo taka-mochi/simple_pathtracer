@@ -246,7 +246,7 @@ Color PathTracer::Radiance_Refraction(const Scene &scene, const Ray &ray, Random
   // Fresnel ‚Ì®
   double F0 = (n_obj-n_vacuum)*(n_obj-n_vacuum)/((n_obj+n_vacuum)*(n_obj+n_vacuum));
   double c = 1 - ( into ? -dot : -refract_dir.dot(normal) );  // 1-cosƒÆ
-  double Fr = F0 + (1-F0)*pow(1-c, 5.0);    // Fresnel (”½Ë‚ÌŠ„‡)
+  double Fr = F0 + (1-F0)*pow(c, 5.0);    // Fresnel (”½Ë‚ÌŠ„‡)
   double n_ratio2 = n_ratio*n_ratio;  // ‹üÜ‘OŒã‚Å‚Ì•úË‹P“x‚Ì•Ï‰»—¦
   double Tr = (1-Fr)*n_ratio2;        // ‹üÜ’¼Œã¨’¼‘O‚ÌŠ„‡
 

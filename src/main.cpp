@@ -14,7 +14,7 @@ using namespace SimpleRenderer;
 static const int supersampling = 4;
 
 static const int startSample = 2;
-static const int endSample = 1024;
+static const int endSample = 2048;
 static const int stepSample = 2;
 
 class SavePPM_callback : public PathTracer::RenderingFinishCallback {
@@ -24,7 +24,7 @@ public:
   void operator()(int samples, const Color *img) {
   	cerr << "save ppm file for sample " << samples << " ..." << endl;
     char name[1024];
-    sprintf(name, "result_qbvh_torii_%04d_%dx%d.ppm", samples, supersampling, supersampling);
+    sprintf(name, "result_cornellbox_%04d_%dx%d.ppm", samples, supersampling, supersampling);
     clock_t begin,end;
     begin = clock();
     PPM::Save(name, img, w, h);
@@ -39,8 +39,8 @@ int main(int argc, char *argv[]) {
 	//PathTracer renderer(width, height, 16, 4);
   SavePPM_callback callback(width, height);
   PathTracer renderer(width, height, startSample, endSample, stepSample, supersampling, &callback);
-	TestScene scene;
-  //CornellBoxScene scene;
+	//TestScene scene;
+  CornellBoxScene scene;
 
 	cerr << "begin rendering..." << endl;
   clock_t t1 = clock();
